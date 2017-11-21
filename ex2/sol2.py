@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from scipy.misc import imread
+from scipy import signal
+
 
 def calculate_dft_matrix(column_to_N,array_to_N,negative,N):
     """
@@ -47,19 +49,48 @@ def DFT2(image):
 def IDFT2(fourier_image):
     return IDFT(IDFT(fourier_image))
 
+def conv_der(im):
+    x_con = signal.convolve2d(im,np.array([[0,0,0],[1,0,-1],[0,0,0]]))
+    y_conv = signal.convolve2d(im,np.array([[0,1,0],[0,0,0],[0,-1,0]]))
+    # plt.imshow((fourier_x_conv) ,cmap=plt.get_cmap('gray'))
+    # plt.show()
+    # plt.imshow((fourier_y_conv), cmap=plt.get_cmap('gray'))
+    # plt.show()
+    magnitude = np.sqrt(np.abs(x_con)**2 + np.abs(y_conv)**2)
+    # plt.imshow((magnitude), cmap=plt.get_cmap('gray'))
+    # plt.show()
+    return magnitude.astype(np.float64)
+
+def fourier_der(im):
+    #2.2
+    x_fourier_der = DFT2(im)*
+
+def blur_spatial (im, kernel_size):
+    #3.1
+    pass
+
+def blur_fourier (im, kernel_size):
+    # 3.2
+    pass
+
+
 
 if __name__ == '__main__':
     # a = np.array([1,2,3,4,5,6])
     # a = a[:,np.newaxis]
-    # image = (imread('F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד '
-    #                 'תמונה\exs\HUJI.Course_Image_Processing\ex2\gray_orig.png'))
-    a = np.array([a for a in range(0,8*511,8)])
-    b = np.cumsum(a)
-    plt.hist(b,256)
-    plt.show()
-    print(b)
-    # plt.imshow(image ,cmap=plt.get_cmap('gray'))
+    image = (imread('F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד '
+                    'תמונה\exs\HUJI.Course_Image_Processing\ex2\gray_orig.png'))
+    # a = np.array([a for a in range(0,8*511,8)])
+    # b = np.cumsum(a)
+    # plt.hist(b,256)
     # plt.show()
+    # print(b)
+
+    conv_der(image)
+
+    # plt.imshow(DFT(DFT(image)).astype(np.float64) ,cmap=plt.get_cmap('gray'))
+    # plt.show()
+
     # DFT2(image )
     # # print (IDFT(DFT(a)))
     # # print(np.fft.ifft2(np.fft.fft2(a)))
