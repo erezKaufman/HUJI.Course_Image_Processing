@@ -1,4 +1,5 @@
 import numpy as np
+
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from scipy.misc import imread
@@ -58,14 +59,18 @@ def calc_magnitude(dx, dy):
 def conv_der(im):
     x_con = signal.convolve2d(im, np.array([[0, 0, 0], [1, 0, -1], [0, 0, 0]]))
     y_conv = signal.convolve2d(im, np.array([[0, 1, 0], [0, 0, 0], [0, -1, 0]]))
+
     # plt.imshow((fourier_x_conv) ,cmap=plt.get_cmap('gray'))
     # plt.show()
     # plt.imshow((fourier_y_conv), cmap=plt.get_cmap('gray'))
     # plt.show()
     # magnitude = np.sqrt(np.abs(x_con)**2 + np.abs(y_conv)**2)
-    # plt.imshow((magnitude), cmap=plt.get_cmap('gray'))
+
+
+    magn = calc_magnitude(x_con, y_conv).astype(np.float64)
+    # plt.imshow((magn), cmap=plt.get_cmap('gray'))
     # plt.show()
-    return calc_magnitude(x_con, y_conv).astype(np.float64)
+    return magn
 
 
 def fourier_der(im):
@@ -89,25 +94,51 @@ def fourier_der(im):
     # plt.show()
     ##############
 
-    plt.imshow(x_derived.astype(np.float64), cmap=plt.get_cmap('gray'))
-    plt.show()
+    # plt.imshow(x_derived.astype(np.float64), cmap=plt.get_cmap('gray'))
+    # plt.show()
     y_derived = IDFT2((2j * np.pi / M) * v_shifted * dft_image)
-    plt.imshow(y_derived.astype(np.float64),cmap=plt.get_cmap('gray'))
-    plt.show()
+    # plt.imshow(y_derived.astype(np.float64),cmap=plt.get_cmap('gray'))
+    # plt.show()
     magn = calc_magnitude(x_derived, y_derived)
-    plt.imshow(magn.astype(np.float64), cmap=plt.get_cmap('gray'))
-    plt.show()
-    pass
+    # plt.imshow(magn.astype(np.float64), cmap=plt.get_cmap('gray'))
+    # plt.show()
+    return magn.astype(np.float64)
 
 
 def blur_spatial(im, kernel_size):
-    # 3.1
-    pass
+    """
 
+    :param im:
+    :param kernel_size:
+    :return:
+    """
+    # 3.1
+    base_gaussian_kernel = gaussian_kernel_1d= np.array([1,1])
+    for i in range(kernel_size-2):
+        gaussian_kernel_1d = signal.convolve(base_gaussian_kernel,gaussian_kernel_1d)
+
+    gaussian_kernel_2d = np.zeros(kernel_size*kernel_size)
+    gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size,kernel_size)
+    gaussian_kernel_2d[int(kernel_size/2)] =gaussian_kernel_1d
+    gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
+
+    # print(gaussian_kernel_2d_T)
+    gaussian_kernel = signal.convolve2d(gaussian_kernel_2d,gaussian_kernel_2d_T,'same')
+
+    gaussian_kernel = np.dot(gaussian_kernel,1/np.sum(gaussian_kernel[:,None]))
+    return_val = signal.convolve2d(gaussian_kernel,im)
+
+    plt.imshow(return_val, cmap=plt.get_cmap('gray'))
+    plt.show()    # print(gaussian_kernel)
 
 def blur_fourier(im, kernel_size):
+    """
     # 3.2
-    pass
+
+    :param im:
+    :param kernel_size:
+    :return:
+    """
 
 
 if __name__ == '__main__':
@@ -115,9 +146,11 @@ if __name__ == '__main__':
     # a = a[:,np.newaxis]
     image = (imread('/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex2/gray_orig.png'))
 
-
-    fourier_der(image)
-
+    # a = conv_der(image)
+    # b = fourier_der(image)
+    # print(np.allclose(a,b)) # TODO check if the conv_der should return an image of shape (256,256) or (258,258
+    blur_spatial(image,15)
     # a = np.arange(-3,3)
-    # a_s = np.fft.fftshift(a)
+    # a_s = np.f
+    # ft.fftshift(a)
     # print(a_s)
