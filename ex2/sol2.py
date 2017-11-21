@@ -42,8 +42,8 @@ def IDFT(fourier_signal):
 
 
 def DFT2(image):
-
-    return DFT(DFT(image).transpose()).transpose()
+    pass
+    # return DFT(DFT(image).transpose()).transpose()
 
 
 def IDFT2(fourier_image):

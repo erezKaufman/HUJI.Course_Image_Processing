@@ -1,0 +1,6 @@
+Q1 - The quantization procedure needs an initial segment division of [0..255] to segments, z. If a division
+will have a gray level segment with no pixels, the procedure will crash. WHY?
+Answer:
+    The reason the procedure will crash is that it will cause a division by zero.
+    If in any case, we will get a segment with no pixels - when we will count the sum of pixels in the segment( in the
+    formula to calculate new list of q's), we will get a zero number - that we will divide by it.
