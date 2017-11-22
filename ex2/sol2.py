@@ -173,7 +173,8 @@ def blur_fourier(im, kernel_size):
 if __name__ == '__main__':
     # a = np.array([1,2,3,4,5,6])
     # a = a[:,np.newaxis]
-    image = (imread('/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex2/gray_orig.png'))
+    image = (imread('/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex1/original.png'))
+    image = rgb2gray(image)
     # print(image.shape)
     # a = conv_der(image)
     # b = fourier_der(image)
@@ -183,8 +184,8 @@ if __name__ == '__main__':
     # plt.show()
     # b = fourier_der(image)
     # print(np.allclose(a,b))
-    a= blur_spatial(image,16)
-    b= blur_fourier(image,16)
+    a= blur_spatial(image,51)
+    b= blur_fourier(image,51)
     print(np.array_equal(a,b))
     # a = np.arange(-3,3)
     # a_s = np.f
