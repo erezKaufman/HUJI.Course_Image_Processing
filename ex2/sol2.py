@@ -57,19 +57,15 @@ def calc_magnitude(dx, dy):
 
 
 def conv_der(im):
-    x_con = signal.convolve2d(im, np.array([[0, 0, 0], [1, 0, -1], [0, 0, 0]]))
-    y_conv = signal.convolve2d(im, np.array([[0, 1, 0], [0, 0, 0], [0, -1, 0]]))
+    x_matrix = np.array([[0,0,0],[1, 0, -1],[0,0,0]])
+    y_conv = np.array([[0, 1, 0], [0, 0, 0], [0, -1, 0]])
 
-    # plt.imshow((fourier_x_conv) ,cmap=plt.get_cmap('gray'))
-    # plt.show()
-    # plt.imshow((fourier_y_conv), cmap=plt.get_cmap('gray'))
-    # plt.show()
-    # magnitude = np.sqrt(np.abs(x_con)**2 + np.abs(y_conv)**2)
+    x_con = signal.convolve2d(im,x_matrix ,mode="same")
+    y_conv = signal.convolve2d(im, y_conv,mode="same")
 
 
     magn = calc_magnitude(x_con, y_conv).astype(np.float64)
-    # plt.imshow((magn), cmap=plt.get_cmap('gray'))
-    # plt.show()
+
     return magn
 
 
@@ -113,23 +109,27 @@ def blur_spatial(im, kernel_size):
     :return:
     """
     # 3.1
-    base_gaussian_kernel = gaussian_kernel_1d= np.array([1,1])
-    for i in range(kernel_size-2):
-        gaussian_kernel_1d = signal.convolve(base_gaussian_kernel,gaussian_kernel_1d)
-
-    gaussian_kernel_2d = np.zeros(kernel_size*kernel_size)
-    gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size,kernel_size)
-    gaussian_kernel_2d[int(kernel_size/2)] =gaussian_kernel_1d
-    gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
-
-    # print(gaussian_kernel_2d_T)
-    gaussian_kernel = signal.convolve2d(gaussian_kernel_2d,gaussian_kernel_2d_T,'same')
-
-    gaussian_kernel = np.dot(gaussian_kernel,1/np.sum(gaussian_kernel[:,None]))
+    gaussian_kernel = create_gaussian_kernel(kernel_size)
     return_val = signal.convolve2d(gaussian_kernel,im)
 
     plt.imshow(return_val, cmap=plt.get_cmap('gray'))
     plt.show()    # print(gaussian_kernel)
+
+
+def create_gaussian_kernel(kernel_size):
+    base_gaussian_kernel = gaussian_kernel_1d = np.array([1, 1])
+    for i in range(kernel_size - 2):
+        gaussian_kernel_1d = signal.convolve(base_gaussian_kernel, gaussian_kernel_1d)
+    gaussian_kernel_2d = np.zeros(kernel_size * kernel_size)
+    #
+    gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size, kernel_size)
+    gaussian_kernel_2d[int(kernel_size / 2)] = gaussian_kernel_1d
+    gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
+    # print(gaussian_kernel_2d_T)
+    gaussian_kernel = signal.convolve2d(gaussian_kernel_2d, gaussian_kernel_2d_T, 'same')
+    gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
+    return gaussian_kernel
+
 
 def blur_fourier(im, kernel_size):
     """
@@ -139,17 +139,36 @@ def blur_fourier(im, kernel_size):
     :param kernel_size:
     :return:
     """
+    N_to_pad = im.shape[0]-kernel_size
+    M_to_pad= im.shape[1]- kernel_size
+    zero_matrix = np.zeros(im.shape)
+    gaussian_kernel = create_gaussian_kernel(kernel_size)
+    zero_matrix[]
+    gaus_test = np.lib.pad(gaussian_kernel,((int(N_to_pad/2),int(N_to_pad/2)+1),(int(M_to_pad/2),int(M_to_pad/2)+1)),mode='constant',constant_values=0)
+    # print(gaus_test)
+    dft_gaussian_kernel = DFT2(gaus_test)
+    dft_im = DFT2(im)
+    inner_product = np.dot(dft_gaussian_kernel,dft_im)
+    inverse_dft_inner_product = IDFT2(inner_product)
+    plt.imshow(inverse_dft_inner_product.astype(np.float64), cmap=plt.get_cmap('gray'))
+    plt.show()  # print(gaussian_kernel)
+
 
 
 if __name__ == '__main__':
     # a = np.array([1,2,3,4,5,6])
     # a = a[:,np.newaxis]
     image = (imread('/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex2/gray_orig.png'))
-
+    # print(image.shape)
     # a = conv_der(image)
     # b = fourier_der(image)
-    # print(np.allclose(a,b)) # TODO check if the conv_der should return an image of shape (256,256) or (258,258
-    blur_spatial(image,15)
+    # plt.imshow(a,cmap=plt.get_cmap('gray'))
+    # plt.show()
+    # plt.imshow(b,cmap=plt.get_cmap('gray'))
+    # plt.show()
+    # b = fourier_der(image)
+    # print(np.allclose(a,b))
+    blur_fourier(image,9)
     # a = np.arange(-3,3)
     # a_s = np.f
     # ft.fftshift(a)
