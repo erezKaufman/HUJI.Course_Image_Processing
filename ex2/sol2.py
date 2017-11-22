@@ -110,16 +110,26 @@ def blur_spatial(im, kernel_size):
     """
     # 3.1
     gaussian_kernel = create_gaussian_kernel(kernel_size)
-    return_val = signal.convolve2d(gaussian_kernel,im)
+    return_val = signal.convolve2d(im,gaussian_kernel,mode="same")
 
     plt.imshow(return_val, cmap=plt.get_cmap('gray'))
     plt.show()    # print(gaussian_kernel)
 
 
 def create_gaussian_kernel(kernel_size):
+    """
+
+    :param kernel_size:
+    :return:
+    """
+
     base_gaussian_kernel = gaussian_kernel_1d = np.array([1, 1])
-    for i in range(kernel_size - 2):
-        gaussian_kernel_1d = signal.convolve(base_gaussian_kernel, gaussian_kernel_1d)
+    if kernel_size == 1:
+        gaussian_kernel_1d = np.array([1])
+    else:
+        for i in range(kernel_size - 2):
+            gaussian_kernel_1d = signal.convolve(base_gaussian_kernel, gaussian_kernel_1d)
+
     gaussian_kernel_2d = np.zeros(kernel_size * kernel_size)
     #
     gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size, kernel_size)
@@ -141,14 +151,19 @@ def blur_fourier(im, kernel_size):
     """
     N_to_pad = im.shape[0]-kernel_size
     M_to_pad= im.shape[1]- kernel_size
-    zero_matrix = np.zeros(im.shape)
     gaussian_kernel = create_gaussian_kernel(kernel_size)
-    zero_matrix[]
-    gaus_test = np.lib.pad(gaussian_kernel,((int(N_to_pad/2),int(N_to_pad/2)+1),(int(M_to_pad/2),int(M_to_pad/2)+1)),mode='constant',constant_values=0)
+
+    if kernel_size %2 ==1:
+        gaus_test = np.lib.pad(gaussian_kernel,((int(N_to_pad/2),int(N_to_pad/2)+1),(int(M_to_pad/2),int(M_to_pad/2)+1)),mode='constant',constant_values=0)
+    else:
+        gaus_test = np.lib.pad(gaussian_kernel,
+                               ((int(N_to_pad / 2), int(N_to_pad / 2)), (int(M_to_pad / 2), int(M_to_pad / 2))),
+                               mode='constant', constant_values=0)
     # print(gaus_test)
-    dft_gaussian_kernel = DFT2(gaus_test)
+    gaussian_shifted = np.fft.fftshift(gaus_test)
+    dft_gaussian_kernel = DFT2(gaussian_shifted)
     dft_im = DFT2(im)
-    inner_product = np.dot(dft_gaussian_kernel,dft_im)
+    inner_product = dft_gaussian_kernel*dft_im
     inverse_dft_inner_product = IDFT2(inner_product)
     plt.imshow(inverse_dft_inner_product.astype(np.float64), cmap=plt.get_cmap('gray'))
     plt.show()  # print(gaussian_kernel)
@@ -168,7 +183,9 @@ if __name__ == '__main__':
     # plt.show()
     # b = fourier_der(image)
     # print(np.allclose(a,b))
-    blur_fourier(image,9)
+    a= blur_spatial(image,16)
+    b= blur_fourier(image,16)
+    print(np.array_equal(a,b))
     # a = np.arange(-3,3)
     # a_s = np.f
     # ft.fftshift(a)
