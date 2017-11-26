@@ -1,0 +1,5 @@
+Question 3: What is the difference between the two results (Blurring in image space and blurring
+            in Fourier space)?
+
+Answer:     there isn't any difference. the result of multiplying a kernel matrix after performing DFT on it and the
+            image itself, and then IDFT the result, is similar of doing a convolution between the two

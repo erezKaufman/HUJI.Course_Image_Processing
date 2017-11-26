@@ -1,0 +1,10 @@
+Question 2: What happens if the center of the gaussian (in the space domain) will not be at the
+            (0,0) of the image? Why does it happen?
+
+Answer:     As we saw during the lectures/Tirgul - if we would not shift the gaussian to the center of the image, we
+            would get the (0,0) index to the center of the image (N/2,M/2 coordinate). it will shift! and why
+            wouldn't it be? what we do with the gausian kernel is that we do inner product while in the frequency
+            domain so it will be similar of doing a convolution with the image, so in that case, we are focusing each
+            time on the pixel in the center, and all the other pixels surrounding it in the size of the kernel. if we
+            do not shift the kernel, when we will calculate each pixel, we will also do a shift to the place where
+            the center of the kernel is located (N/2,M/2). and voila!

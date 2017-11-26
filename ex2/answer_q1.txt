@@ -1,0 +1,5 @@
+Question 1: Why did you get two different magnitude images?
+
+Answer:     the reason for it is most likely that when we calculate derivative using convolution, it is only a discrete
+            approximation for the derivative, and when using FFT - we calculate the derivative by a series, which is a closer
+            approximation.
