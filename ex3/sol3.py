@@ -26,7 +26,9 @@ def display_image_in_actual_size(im_data):
 
     plt.show()
 
-def create_gaussian_kernel(kernel_size):
+
+
+def create_gaussian_kernel(kernel_size,is_expand):
     """
 
     :param kernel_size:
@@ -46,7 +48,11 @@ def create_gaussian_kernel(kernel_size):
     gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
     # print(gaussian_kernel_2d_T)
     gaussian_kernel = ndimage.filters.convolve(gaussian_kernel_2d, gaussian_kernel_2d_T)
+    # if is_expand:
+    #     gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
+
     gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
+
     return gaussian_kernel_1d, gaussian_kernel
 
 
@@ -73,6 +79,15 @@ def reduce(im,gaussian_kernel):
     im_blured = ndimage.filters.convolve(im,gaussian_kernel)
     return im_blured[::2,::2]
 
+def expand(im,gaussian_kernel):
+    new_size = np.array(im.shape)*2
+    zero_matrix = np.zeros(new_size,dtype=np.float64)
+    zero_matrix[::2,::2] = im
+    im_blured = ndimage.filters.convolve(zero_matrix,gaussian_kernel)
+    # plt.imshow(zero_matrix,cmap=plt.get_cmap('gray'))
+    # plt.show()
+    return im_blured
+
 def build_gaussian_pyramid(im, max_levels, filter_size):
     """
     Task 3.1 a
@@ -88,8 +103,8 @@ def build_gaussian_pyramid(im, max_levels, filter_size):
     :return:            tuple of two values - pyr, filter_vec
     """
     pyr = []
-    pyr.append(im)
-    filter_vec , gaussian_kernel = create_gaussian_kernel(filter_size)
+    # pyr.append(im)
+    filter_vec , gaussian_kernel = create_gaussian_kernel(filter_size,False)
     for level in range(max_levels):
         im_shape = im.shape
         if im_shape[0] <= 16 or im_shape[1] <= 16:
@@ -99,8 +114,6 @@ def build_gaussian_pyramid(im, max_levels, filter_size):
             pyr.append(reduced_image)
             im = reduced_image
     # TODO check to see what I can do to check dimensions are multiples of 2**(max_levels−1)
-    # for pic in pyr:
-    #     display_image_in_actual_size(pic)
 
     return pyr, filter_vec
 
@@ -119,7 +132,21 @@ def  build_laplacian_pyramid(im, max_levels, filter_size):
                          in constructing the pyramid filter (e.g for filter_size = 3 you should get [0.25, 0.5, 0.25]).
     :return:             tuple of two values - pyr, filter_vec
     """
-    pass
+    gaus_pyr, filter_vec = build_gaussian_pyramid(im,max_levels,filter_size)
+    pyr = []
+
+    lapla_filter_vec, gaussian_kernel = create_gaussian_kernel(filter_size, True)
+    level = 0
+    for level in range(len(gaus_pyr)-1):
+
+        expand_image = expand(gaus_pyr[level+1],gaussian_kernel*2)
+        pyr.append(gaus_pyr[level] - expand_image)
+    pyr.append(gaus_pyr[level])
+
+    for imag in pyr:
+        display_image_in_actual_size(imag)
+
+    return pyr , filter_vec
 
 
 
@@ -192,7 +219,7 @@ def blending_example2():
 
 
 if __name__ == '__main__':
-    image_path = "/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex3/gray_orig.png"
+    image_path = "/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex3/monkey.jpg"
     im = read_image(image_path,1)
-    pyr, filter_vec = build_gaussian_pyramid(im,3,3)
+    pyr, filter_vec = build_laplacian_pyramid(im,3,3)
     # build_gaussian_pyramid(im, 3, 3)
