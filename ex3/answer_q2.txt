@@ -1,0 +1,4 @@
+Q2: Blending is performed with different image filters (filter_size_im = 1,3,5,7...).
+
+
+Answer:
