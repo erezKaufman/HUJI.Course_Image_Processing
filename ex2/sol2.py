@@ -1,223 +1,183 @@
 import numpy as np
-
+from scipy import signal
+import scipy.stats as st
+from scipy import misc
+from scipy.misc import imread as imread
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
-from scipy.misc import imread, comb
-from scipy import signal
-PIXEL_MAX_INTENSITY = 255
+
+kernel = [1, 0, -1]
+GRAY_SCALE = 1
+RGB = 2
+NORMALIZE_IMAGE_VALUES = 255
 
 
-def read_image(filename, representation):
+def read_image(filename, representation=1):
     """
-    The function will return an image file represented as the user wished it to be
-    :param filename:  a string that tells the image location
-    :param representation:  an integer representing in what way we wish the image to appear.
-    1 - gray scale
-    2 - rgb
-    :return: a numpy image format
+    reads an image from a file path (gray scale or RGB)
+    :param filename:  the file name
+    :param representation: the representation we choose 1 for Gray and 2 for RGB
+    :return: a float64 image
     """
-    newIm = imread(filename)
-    if representation == 2 or len(newIm.shape) == 2:
-        floatIm = newIm.astype(np.float64)
-        floatIm /= PIXEL_MAX_INTENSITY
-        return floatIm
-    else:
-        return rgb2gray(newIm)
+    if representation == GRAY_SCALE:
+        return rgb2gray(imread(filename, True)).astype(np.float64)
+    if representation == RGB:
+        return imread(filename, False).astype(np.float64) / NORMALIZE_IMAGE_VALUES
 
 
 
-def calculate_dft_matrix(column_to_N, array_to_N, negative, N):
+def getTransformMatrix(N):
     """
-    calculating the dft matrix for the dft process
-    :param column_to_N:
-    :param array_to_N:
-    :param negative:
-    :param N:
-    :return:
+    returns a transformation matrix size of N
+    :param N: the size of the matrix
+    :return: a fourier transformation matrix
     """
-    return np.exp((negative * 2j * np.pi * column_to_N * array_to_N) / N).astype(np.complex128)
+    x = np.arange(N)
+    u = x.reshape((N, 1))
+    transform_matrix = np.exp(-2j * np.pi * u * x / N)
+    return transform_matrix
 
 
 def DFT(signal):
     """
-
-    :param signal:
-    :return:
+    transforms the signal to fourier_signal
+    :param signal: the signal to transform
+    :return: a fourier representation of the signal
     """
     N = signal.shape[0]
-    array_to_N = np.arange(N)
-    column_to_N = array_to_N.reshape(N, 1)
-    dft_matrix = calculate_dft_matrix(column_to_N, array_to_N, (-1), N)
-    return np.dot(dft_matrix, signal).astype(np.complex128)
+    transform_matrix = getTransformMatrix(N).astype(np.complex128)
+    return np.dot(transform_matrix, signal).astype(np.complex128)
+
+
+def getInverseTransformMatrix(N):
+    """
+    returns the inverse transformation matrix
+    :param N: the size of the inverse transformation matrix
+    :return: the inverse transformation matrix
+    """
+    x = np.arange(N)
+    u = x.reshape((N, 1))
+    transform_matrix = np.exp(2j * np.pi * u * x / N) / N
+    return transform_matrix
 
 
 def IDFT(fourier_signal):
     """
-
-    :param fourier_signal:
-    :return:
+    transforms the fourier_signal to signal
+    :param fourier_signal: the fourier signal to transform
+    :return: the original signal of the fourier_signal
     """
     N = fourier_signal.shape[0]
-    array_to_N = np.arange(N)
-    column_to_N = array_to_N[:, np.newaxis]
-    dft_matrix = calculate_dft_matrix(column_to_N, array_to_N, 1, N)
-    return (np.dot(dft_matrix, fourier_signal)) / N
+    inv_trans_matrix = getInverseTransformMatrix(N).astype(np.complex128)
+    return np.dot(inv_trans_matrix, fourier_signal).astype(np.complex128)
 
 
 def DFT2(image):
+    """
+    transforms the image to fourier_image
+    :param image: the image to transform
+    :return: a fourier representation of the image
+    """
     return DFT(DFT(image).transpose()).transpose()
 
 
 def IDFT2(fourier_image):
+    """
+    transforms the fourier_image to the original image
+    :param fourier_image: the fourier_image to transform
+    :return: the original signal of the fourier_image
+    """
     return IDFT(IDFT(fourier_image).transpose()).transpose()
 
 
-def calc_magnitude(dx, dy):
-    return np.sqrt(np.abs(dx) ** 2 + np.abs(dy) ** 2)
+def getMagnitude(dx, dy):
+    """
+    returns the magnitude of dx and dy derivative of an image
+    :param dx: The x axis derivative of an image
+    :param dy: The y axis derivative of an image
+    :return: the magnitude of the gradient vector
+    """
+    return np.sqrt(np.abs(dx) * 2 + np.abs(dy) * 2)
 
 
 def conv_der(im):
-    x_matrix = np.array([[0, 0, 0], [1, 0, -1], [0, 0, 0]])
-    y_conv = np.array([[0, 1, 0], [0, 0, 0], [0, -1, 0]])
+    """
+    computes the derivative of the image and returns its magnitude
+    :param im: the image to compute on
+    :return: the derivatives magnitude
+    """
+    padded_kernel_row = np.asarray([[1, 0, -1]])
+    padded_kernel_colum = padded_kernel_row.transpose()
 
-    x_con = signal.convolve2d(im, x_matrix, mode="same")
-    y_conv = signal.convolve2d(im, y_conv, mode="same")
+    dx = signal.convolve2d(im, padded_kernel_row, mode='same')
+    dy = signal.convolve2d(im, padded_kernel_colum, mode='same')
 
-    magn = calc_magnitude(x_con, y_conv).astype(np.float64).astype(np.float64)
-
-    return magn
+    return getMagnitude(dx, dy)
 
 
 def fourier_der(im):
-    # 2.2
-    # first - shift the image.
+    """
+    computes the fourier derivative of the image and returns its magnitude
+    :param im: the image to compute on
+    :return: the fourier derivatives magnitude
+    """
     N = im.shape[0]
+    F = DFT2(im)
+    U = np.concatenate((np.arange(np.floor(N / 2) + 1), np.flip((-1 * np.arange(1, np.ceil(N / 2))), 0)))
+
+    dx = IDFT2(F * U.reshape(N,1))
+
     M = im.shape[1]
-    u = np.arange(-N / 2, N / 2)
-    v = np.arange(-M / 2, M / 2)
-    u_shifted = np.fft.fftshift(u).reshape((N, 1))
-    v_shifted = np.fft.fftshift(v).reshape((1,M))
-    dft_image = DFT2(im)
+    V = np.concatenate((np.arange(np.floor(M / 2) + 1), np.flip((-1 * np.arange(1, np.ceil(M / 2))), 0)))
+    dy = IDFT2(F * V.reshape(1,M))
 
-    # second, calculate it's DFT
-    # third - multiply with constants
-    x_derived = IDFT2((2j * np.pi / N) * (u_shifted * dft_image))
+    return getMagnitude(dx, dy)
 
-    # plt.imshow(x_derived.astype(np.float64), cmap=plt.get_cmap('gray'))
-    # plt.show()
-    y_derived = IDFT2((2j * np.pi / M) * v_shifted * dft_image)
-    # plt.imshow(y_derived.astype(np.float64),cmap=plt.get_cmap('gray'))
-    # plt.show()
-    # plt.imshow(magn.astype(np.float64), cmap=plt.get_cmap('gray'))
-    # plt.show()
-    magn = calc_magnitude(x_derived, y_derived).astype(np.float64)
-    return magn.astype(np.float64)
+
+def getGaussianKernel(size):
+    """
+    returns a gaussian kernel of a given size
+    :param size: the size of the kernal
+    :return: a gaussian kernel of size "size"
+    """
+    start_vector = np.array([1, 1])
+    bin_vector = np.array([1, 1])
+    for i in range(size - 2):
+        bin_vector = np.convolve(start_vector, bin_vector)
+
+    guass_matrix = np.outer(np.array(bin_vector), np.array(bin_vector))
+    return guass_matrix / np.sum(guass_matrix)
 
 
 def blur_spatial(im, kernel_size):
     """
-
-    :param im:
-    :param kernel_size:
-    :return:
+    blurs an image with a guassian kernel
+    :param im: the image to blur
+    :param kernel_size: the kernel size
+    :return: a blurred image
     """
-    # 3.1
-
-
-
-
-
-
-    gaussian_kernel = create_gaussian_kernel(kernel_size)
-    return_val = signal.convolve2d(im, gaussian_kernel, mode="same")
-
-    return return_val.astype(np.float64)
-
-
-def create_gaussian_kernel(kernel_size):
-    """
-
-    :param kernel_size:
-    :return:
-    """
-    base_gaussian_kernel = gaussian_kernel_1d = np.array([1, 1])
-    if kernel_size == 1:
-        gaussian_kernel_1d = np.array([1])
-    else:
-        for i in range(kernel_size - 2):
-            gaussian_kernel_1d = signal.convolve(base_gaussian_kernel, gaussian_kernel_1d)
-
-    gaussian_kernel_2d = np.zeros(kernel_size * kernel_size)
-    #
-    gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size, kernel_size)
-    gaussian_kernel_2d[int(kernel_size / 2)] = gaussian_kernel_1d
-    gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
-    # print(gaussian_kernel_2d_T)
-    gaussian_kernel = signal.convolve2d(gaussian_kernel_2d, gaussian_kernel_2d_T, 'same')
-    gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
-    return gaussian_kernel
-
+    if(kernel_size==1):
+        return im
+    guass_kernel = getGaussianKernel(kernel_size)
+    return signal.convolve2d(im, guass_kernel,mode='same',boundary='fill',fillvalue=0)
 
 def blur_fourier(im, kernel_size):
     """
-    # 3.2
-
-    :param im:
-    :param kernel_size:
-    :return:
+    blurs an image with a guassian kernel
+    :param im: the image to blur
+    :param kernel_size: the kernel size
+    :return: a blurred image
     """
+    if(kernel_size==1):
+        return im
+    M, N = im.shape
+    kernel = getGaussianKernel(kernel_size)
+    X = M // 2 + 1
+    Y = N // 2 + 1
+    offset = kernel_size // 2
+    G = np.zeros(im.shape)
 
-    N_to_pad = im.shape[0] - kernel_size
-    M_to_pad = im.shape[1] - kernel_size
-    gaussian_kernel = create_gaussian_kernel(kernel_size)
-
-    if kernel_size % 2 == 1:
-        gaus_test = np.lib.pad(gaussian_kernel,
-                               ((np.floor(N_to_pad / 2), np.floor(N_to_pad / 2) + 1),
-                                (np.floor(M_to_pad / 2), np.floor(M_to_pad / 2) + 1)),
-                               mode='constant', constant_values=0)
-    else:
-        gaus_test = np.lib.pad(gaussian_kernel,
-                               ((np.floor(N_to_pad / 2), np.floor(N_to_pad / 2)), (np.floor(M_to_pad / 2),
-                                                                                   np.floor(M_to_pad /
-                                                                                            2))),
-                               mode='constant', constant_values=0)
-    gaussian_shifted = np.fft.fftshift(gaus_test)
-    dft_gaussian_kernel = DFT2(gaussian_shifted)
-    dft_im = DFT2(im)
-    inner_product = np.multiply(dft_gaussian_kernel, dft_im)
-    inverse_dft_inner_product = IDFT2(inner_product)
-    return inverse_dft_inner_product.astype(np.float64)
-
-
-if __name__ == '__main__':
-    # a = np.array([1,2,3,4,5,6])
-    # a = a[:,np.newaxis]
-    # image = (imread('F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד '
-    #                 'תמונה\exs\HUJI.Course_Image_Processing\ex2\monkey.jpg'))
-    image = read_image("external/monkey.jpg", 1)
-
-    image = rgb2gray(image)
-    # print(image.shape)
-    # a = conv_der(image)
-    # b = fourier_der(image)
-    # plt.imshow(a,cmap=plt.get_cmap('gray'))
-    # plt.show()
-    # plt.imshow(b,cmap=plt.get_cmap('gray'))
-    # plt.show()
-    b = fourier_der(image)
-    # print(np.allclose(a,b))
-    a = blur_spatial(image, 9)
-    # b = blur_fourier(image, 9)
-    plt.figure()
-    plt.imshow(a, cmap=plt.get_cmap('gray'))
-    plt.figure()
-    # c = np.fft.fftshift(c)
-    plt.imshow(b, cmap=plt.get_cmap('gray'))
-    print("real:\n", a)
-    # print(np.array_equal(b, c))
-    # a = np.arange(-3,3)
-    plt.show()
-    # a_s = np.f
-    # ft.fftshift(a)
-    # print(a_s)
+    G[X - offset:X + offset + 1, Y - offset:Y + offset + 1] = kernel
+    G = np.fft.ifftshift(G)
+    fourier_im = DFT2(im)
+    return np.real(IDFT2(np.multiply(fourier_im,G)))
