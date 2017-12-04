@@ -101,7 +101,7 @@ def histogram_equalize_gray(gray_image):
     :param gray_image: a numpy image format
     :return: the list as specified in 'histogram_equalize' documentation
     """
-    gray_level = (gray_image * 255).astype(np.uint8)
+    gray_level = (gray_image * 25).astype(np.uint8)
 
     # original image histogram to return
     hist_orig, yAxe = np.histogram(gray_level.flatten(), 256)
