@@ -1,15 +1,18 @@
-from skimage import data
 from skimage.transform import pyramid_gaussian, pyramid_laplacian
-
+import os
 import numpy as np
 
 from scipy.ndimage.filters import convolve as convolve
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
-from scipy.misc import imread, comb
-from scipy import signal, ndimage
+from scipy.misc import imread
+from scipy import signal
 
 PIXEL_MAX_INTENSITY = 255
+
+
+def relpath(filename):
+    return os.path.join(os.path.dirname(__file__), filename)
 
 
 def display_image_in_actual_size(im_data):
@@ -115,7 +118,7 @@ def build_gaussian_pyramid(im, max_levels, filter_size):
     filter_vec = filter_vec.reshape(1, filter_size)
     filter_vec_t = filter_vec.transpose()
 
-    for level in range(max_levels-1):
+    for level in range(max_levels - 1):
         im_shape = new_image.shape
         if im_shape[0] <= 16 or im_shape[1] <= 16:
             break
@@ -217,11 +220,11 @@ def display_pyramid(pyr, levels):
     :param levels:
     :return: None
     """
-    plt.figure() # TODO REMOVE THIS!
+    plt.figure()  # TODO REMOVE THIS!
 
     image = render_pyramid(pyr, levels)
     plt.imshow(image, cmap=plt.get_cmap('gray'))
-    # plt.show() # TODO RETURN THIS!
+    plt.show()  # TODO RETURN THIS!
 
 
 def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mask):
@@ -241,16 +244,22 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
                             defining the filter used in the construction of the Gaussian pyramid of mask.
     :return:  im_blend
     """
-    im1_lpyr = build_laplacian_pyramid(im1, max_levels, filter_size_im)
-    im2_lpyr = build_laplacian_pyramid(im2, max_levels, filter_size_im)
-    mask_gpyr = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
+    # L1, vec = build_laplacian_pyramid(im1, max_levels, filter_size_im)
+    # L2, vec = build_laplacian_pyramid(im2, max_levels, filter_size_im)
+    L1= list(pyramid_laplacian(im1, max_layer=2, downscale=2))
+    L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
+    Gm, vec = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
     l_out = []
-    for index in range(max_levels):
-        first_product = np.dot(mask_gpyr[index], im1_lpyr[index])
-        second_product = np.dot((1 - mask_gpyr[index]), im2_lpyr[index])
-        l_out.append(first_product + second_product)
-    return np.clip(laplacian_to_image(l_out, filter_vec, [1 for i in range(max_levels)]), 0,
-                   1)  # TODO check the function
+    for k in range(max_levels):
+        first_product = (Gm[k]) * (L1[k])
+        second_product = (1 - Gm[k]) * L2[k]
+        result = first_product + second_product
+
+        plt.imshow(result, cmap=plt.get_cmap('gray'))
+        plt.show() # TODO RETURN THIS!
+        l_out.append(result)
+    return (laplacian_to_image(l_out, filter_vec, [1 for i in range(max_levels)]))
+                     # TODO check the function
 
 
 def blending_example1():
@@ -258,7 +267,14 @@ def blending_example1():
     Task 4.1 a
     :return: im1, im2, mask, im_blend
     """
-    pass
+    image1 = read_image(relpath('jerusalem_sky1.jpg'), 1)
+    image2 = read_image(relpath('aurora1.jpg'), 1)
+    mask1 = read_image(relpath('mask1.jpg'), 1)
+    mask1 = mask1 > 127
+    # print(mask1)
+    ret_image = pyramid_blending(image1, image2, mask1, 3, 3, 3)
+    plt.imshow(ret_image, cmap=plt.get_cmap('gray'))
+    plt.show()  # TODO RETURN THIS!
 
 
 def blending_example2():
@@ -272,7 +288,7 @@ def blending_example2():
 if __name__ == '__main__':
     image_path = "F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד תמונה\exs\HUJI.Course_Image_Processing\ex3\gray_orig.png"
     im = read_image(image_path, 1)
-    pyr, filter_vec = build_laplacian_pyramid(im, 4 , 3)
+    pyr, filter_vec = build_laplacian_pyramid(im, 4, 3)
     image = im
 
     lap_pyr = list(pyramid_laplacian(image, max_layer=3, downscale=2))
@@ -285,9 +301,10 @@ if __name__ == '__main__':
     #     display_image_in_actual_size(pic)
     #     display_image_in_actual_size(bpic)
     #     plt.show()
-    display_pyramid(lap_pyr, 4)
-    display_pyramid(pyr, 4)
-    plt.show()
+    # display_pyramid(lap_pyr, 4)
+    # display_pyramid(pyr, 4)
+    # plt.show()
+    blending_example1()
     # image = laplacian_to_image(pyr,filter_vec,[1,1,1])
 
     # for buikt_pyt, pyt in zip(lap_pyr,pyr):
@@ -312,4 +329,3 @@ if __name__ == '__main__':
     #
     # fig, ax = plt.subplots()
     # ax.imshow(x`composite_image)
-
