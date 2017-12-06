@@ -1,4 +1,3 @@
-from skimage.transform import pyramid_gaussian, pyramid_laplacian
 import os
 import numpy as np
 
@@ -173,7 +172,7 @@ def laplacian_to_image(lpyr, filter_vec, coeff):
     :param coeff:
     :return: img
     """
-
+    filter_vec *= 2
     new_image = lpyr[0]
     temp_image = expand(lpyr[len(lpyr) - 1] * coeff[len(coeff) - 1], filter_vec, filter_vec.transpose())
     for index in range(len(lpyr) - 2, -1, -1):
@@ -244,21 +243,24 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
                             defining the filter used in the construction of the Gaussian pyramid of mask.
     :return:  im_blend
     """
-    L1, vec = build_laplacian_pyramid(im1, max_levels, filter_size_im)
-    L2, vec = build_laplacian_pyramid(im2, max_levels, filter_size_im)
+    L1, filter_vec1 = build_laplacian_pyramid(im1, max_levels, filter_size_im)
+    L2, filter_vec2 = build_laplacian_pyramid(im2, max_levels, filter_size_im)
+
     # L1= list(pyramid_laplacian(im1, max_layer=2, downscale=2))
     # L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
-    Gm, vec = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
+    Gm, filter_vec3 = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
     l_out = []
     for k in range(max_levels):
         first_product = (Gm[k]) * (L1[k])
         second_product = (1 - Gm[k]) * L2[k]
         result = first_product + second_product
 
-        plt.imshow(result, cmap=plt.get_cmap('gray'))
-        plt.show() # TODO RETURN THIS!
+
         l_out.append(result)
-    return (laplacian_to_image(l_out, filter_vec, [1 for i in range(max_levels)]))
+    returned_image = laplacian_to_image(l_out, filter_vec1 / 2, [1 for i in range(max_levels)])
+    plt.imshow(returned_image)
+    plt.show() # TODO RETURN THIS!
+    return (returned_image)
                      # TODO check the function
 
 
@@ -267,13 +269,19 @@ def blending_example1():
     Task 4.1 a
     :return: im1, im2, mask, im_blend
     """
-    image1 = read_image(relpath('jerusalem_sky1.jpg'), 1)
-    image2 = read_image(relpath('aurora1.jpg'), 1)
+    image1 = read_image(relpath('jerusalem_sky1.jpg'), 2)
+    image2 = read_image(relpath('aurora1.jpg'), 2)
     mask1 = read_image(relpath('mask1.jpg'), 1)
-    mask1 = mask1 > 127
-    # print(mask1)
-    ret_image = pyramid_blending(image1, image2, mask1, 3, 3, 3)
-    plt.imshow(ret_image, cmap=plt.get_cmap('gray'))
+    mask1 = mask1 > 0
+    r_part= pyramid_blending(image1[:,:,0],image2[:,:,0],mask1,5,5,3)
+    g_part = pyramid_blending(image1[:,:,1],image2[:,:,1],mask1,5,5,3)
+    b_part = pyramid_blending(image1[:,:,2],image2[:,:,2],mask1,5,5,3)
+
+    ret_image = np.zeros(image2.shape)
+    ret_image[:,:,0] = r_part
+    ret_image[:,:,1] = g_part
+    ret_image[:,:,2] = b_part
+    plt.imshow(ret_image)
     plt.show()  # TODO RETURN THIS!
 
 
@@ -282,16 +290,29 @@ def blending_example2():
     Task 4.1 b
     :return: im1, im2, mask, im_blend
     """
-    pass
+    image1 = read_image(relpath('image1_2.jpg'), 2)
+    image2 = read_image(relpath('image2_2.jpg'), 2)
+    mask1 = read_image(relpath('mask_test1.jpg'), 1)
+    mask1 = mask1>0
+
+    r_part = pyramid_blending(image1[:, :, 0], image2[:, :, 0], mask1, 5, 5, 3)
+    g_part = pyramid_blending(image1[:, :, 1], image2[:, :, 1], mask1, 5, 5, 3)
+    b_part = pyramid_blending(image1[:, :, 2], image2[:, :, 2], mask1, 5, 5, 3)
+    ret_image = np.zeros(image2.shape)
+    ret_image[:, :, 0] = r_part
+    ret_image[:, :, 1] = g_part
+    ret_image[:, :, 2] = b_part
+    plt.imshow(ret_image)
+    plt.show()  # TODO RETURN THIS!
 
 
 if __name__ == '__main__':
-    image_path = "F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד תמונה\exs\HUJI.Course_Image_Processing\ex3\gray_orig.png"
-    im = read_image(image_path, 1)
-    pyr, filter_vec = build_laplacian_pyramid(im, 4, 3)
-    image = im
+    # image_path = "F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד תמונה\exs\HUJI.Course_Image_Processing\ex3\gray_orig.png"
+    # im = read_image(image_path, 1)
+    # pyr, filter_vec = build_laplacian_pyramid(im, 4, 3)
+    # image = im
 
-    lap_pyr = list(pyramid_laplacian(image, max_layer=3, downscale=2))
+    # lap_pyr = list(pyramid_laplacian(image, max_layer=3, downscale=2))
 
     # for pic in pyr:
     #     display_image_in_actual_size(pic)
@@ -304,7 +325,7 @@ if __name__ == '__main__':
     # display_pyramid(lap_pyr, 4)
     # display_pyramid(pyr, 4)
     # plt.show()
-    blending_example1()
+    blending_example2()
     # image = laplacian_to_image(pyr,filter_vec,[1,1,1])
 
     # for buikt_pyt, pyt in zip(lap_pyr,pyr):
