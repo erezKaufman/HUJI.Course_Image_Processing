@@ -1,6 +1,6 @@
 import os
 import numpy as np
-
+from  skimage.transform import pyramid_laplacian
 from scipy.ndimage.filters import convolve as convolve
 import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
@@ -47,17 +47,7 @@ def create_gaussian_filter(kernel_size):
         for i in range(kernel_size - 2):
             gaussian_kernel_1d = signal.convolve(base_gaussian_kernel, gaussian_kernel_1d)
 
-    # gaussian_kernel_2d = np.zeros(kernel_size * kernel_size)
-    # #
-    # gaussian_kernel_2d = gaussian_kernel_2d.reshape(kernel_size, kernel_size)
-    # gaussian_kernel_2d[int(kernel_size / 2)] = gaussian_kernel_1d
-    # gaussian_kernel_2d_T = gaussian_kernel_2d.transpose()
-    # # print(gaussian_kernel_2d_T)
-    # gaussian_kernel = ndimage.filters.convolve(gaussian_kernel_2d, gaussian_kernel_2d_T)
-    # # if is_expand:
-    # #     gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
-    #
-    # gaussian_kernel = np.dot(gaussian_kernel, 1 / np.sum(gaussian_kernel[:, None]))
+
     returned_kernel = np.dot(gaussian_kernel_1d, 1 / np.sum(gaussian_kernel_1d[:, None]))
     return returned_kernel
 
@@ -90,9 +80,9 @@ def expand(im, filter_vec, filter_vec_t):
     new_size = np.array(im.shape) * 2
     zero_matrix = np.zeros(new_size, dtype=np.float64)
     zero_matrix[::2, ::2] = im
-    im_blured = convolve(zero_matrix, filter_vec)
+    im_blured = convolve(zero_matrix, filter_vec, )
     im_blured = convolve(im_blured, filter_vec_t)
-    return im_blured
+    return im_blured[::,::]
 
 
 # DONE
@@ -172,7 +162,7 @@ def laplacian_to_image(lpyr, filter_vec, coeff):
     :param coeff:
     :return: img
     """
-    filter_vec *= 2
+
     new_image = lpyr[0]
     temp_image = expand(lpyr[len(lpyr) - 1] * coeff[len(coeff) - 1], filter_vec, filter_vec.transpose())
     for index in range(len(lpyr) - 2, -1, -1):
@@ -250,18 +240,17 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
     # L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
     Gm, filter_vec3 = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
     l_out = []
-    for k in range(max_levels):
+    for k in range(len(L1)):
         first_product = (Gm[k]) * (L1[k])
         second_product = (1 - Gm[k]) * L2[k]
         result = first_product + second_product
 
 
         l_out.append(result)
-    returned_image = laplacian_to_image(l_out, filter_vec1 / 2, [1 for i in range(max_levels)])
-    plt.imshow(returned_image)
-    plt.show() # TODO RETURN THIS!
+    returned_image = laplacian_to_image(l_out, filter_vec1 , [1 for i in range(max_levels)])
+    # plt.imshow(returned_image)
+    # plt.show() # TODO RETURN THIS!
     return (returned_image)
-                     # TODO check the function
 
 
 def blending_example1():
@@ -269,10 +258,11 @@ def blending_example1():
     Task 4.1 a
     :return: im1, im2, mask, im_blend
     """
-    image1 = read_image(relpath('jerusalem_sky1.jpg'), 2)
-    image2 = read_image(relpath('aurora1.jpg'), 2)
-    mask1 = read_image(relpath('mask1.jpg'), 1)
-    mask1 = mask1 > 0
+    image1 = read_image(relpath('external/image1_1.jpg'), 2)
+    image2 = read_image(relpath('external/image2_1.jpg'), 2)
+    mask1 = read_image(relpath('external/mask_1.jpg'), 1)
+    mask1 = mask1 < 1
+    mask1 = np.logical_not(mask1)
     r_part= pyramid_blending(image1[:,:,0],image2[:,:,0],mask1,5,5,3)
     g_part = pyramid_blending(image1[:,:,1],image2[:,:,1],mask1,5,5,3)
     b_part = pyramid_blending(image1[:,:,2],image2[:,:,2],mask1,5,5,3)
@@ -283,6 +273,7 @@ def blending_example1():
     ret_image[:,:,2] = b_part
     plt.imshow(ret_image)
     plt.show()  # TODO RETURN THIS!
+    return image1, image2, mask1, ret_image
 
 
 def blending_example2():
@@ -290,28 +281,32 @@ def blending_example2():
     Task 4.1 b
     :return: im1, im2, mask, im_blend
     """
-    image1 = read_image(relpath('image1_2.jpg'), 2)
-    image2 = read_image(relpath('image2_2.jpg'), 2)
-    mask1 = read_image(relpath('mask_test1.jpg'), 1)
-    mask1 = mask1>0
+    image1 = read_image(relpath('external/cat1_test.jpg'), 2)
+    image2 = read_image(relpath('external/tiger_test.jpg'), 2)
+    mask1 = read_image(relpath('external/mask_test.jpg'), 1)
+    mask1 = mask1 >0
+    # mask1 = np.logical_not(mask1)
 
-    r_part = pyramid_blending(image1[:, :, 0], image2[:, :, 0], mask1, 5, 5, 3)
-    g_part = pyramid_blending(image1[:, :, 1], image2[:, :, 1], mask1, 5, 5, 3)
-    b_part = pyramid_blending(image1[:, :, 2], image2[:, :, 2], mask1, 5, 5, 3)
+    r_part = pyramid_blending(image1[:, :, 0], image2[:, :, 0], mask1, 3, 3, 3)
+    g_part = pyramid_blending(image1[:, :, 1], image2[:, :, 1], mask1, 3, 3, 3)
+    b_part = pyramid_blending(image1[:, :, 2], image2[:, :, 2], mask1, 3, 3, 3)
     ret_image = np.zeros(image2.shape)
     ret_image[:, :, 0] = r_part
     ret_image[:, :, 1] = g_part
     ret_image[:, :, 2] = b_part
     plt.imshow(ret_image)
     plt.show()  # TODO RETURN THIS!
+    return image1, image2, mask1, ret_image
 
 
 if __name__ == '__main__':
-    # image_path = "F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד תמונה\exs\HUJI.Course_Image_Processing\ex3\gray_orig.png"
+    blending_example1()
+
+    # image_path = "/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex3/monkey.jpg"
     # im = read_image(image_path, 1)
     # pyr, filter_vec = build_laplacian_pyramid(im, 4, 3)
     # image = im
-
+    #
     # lap_pyr = list(pyramid_laplacian(image, max_layer=3, downscale=2))
 
     # for pic in pyr:
@@ -322,10 +317,11 @@ if __name__ == '__main__':
     #     display_image_in_actual_size(pic)
     #     display_image_in_actual_size(bpic)
     #     plt.show()
+    # plt.figure()
     # display_pyramid(lap_pyr, 4)
-    # display_pyramid(pyr, 4)
     # plt.show()
-    blending_example2()
+    # plt.show()
+
     # image = laplacian_to_image(pyr,filter_vec,[1,1,1])
 
     # for buikt_pyt, pyt in zip(lap_pyr,pyr):
