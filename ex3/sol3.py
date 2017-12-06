@@ -244,10 +244,10 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
                             defining the filter used in the construction of the Gaussian pyramid of mask.
     :return:  im_blend
     """
-    # L1, vec = build_laplacian_pyramid(im1, max_levels, filter_size_im)
-    # L2, vec = build_laplacian_pyramid(im2, max_levels, filter_size_im)
-    L1= list(pyramid_laplacian(im1, max_layer=2, downscale=2))
-    L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
+    L1, vec = build_laplacian_pyramid(im1, max_levels, filter_size_im)
+    L2, vec = build_laplacian_pyramid(im2, max_levels, filter_size_im)
+    # L1= list(pyramid_laplacian(im1, max_layer=2, downscale=2))
+    # L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
     Gm, vec = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
     l_out = []
     for k in range(max_levels):
