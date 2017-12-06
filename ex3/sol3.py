@@ -240,14 +240,14 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
     # L2= list(pyramid_laplacian(im2, max_layer=2, downscale=2))
     Gm, filter_vec3 = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
     l_out = []
-    for k in range(len(L1)):
+    for k in range(len(L2)):
         first_product = (Gm[k]) * (L1[k])
         second_product = (1 - Gm[k]) * L2[k]
         result = first_product + second_product
 
 
         l_out.append(result)
-    returned_image = laplacian_to_image(l_out, filter_vec1 , [1 for i in range(max_levels)])
+    returned_image = laplacian_to_image(l_out, filter_vec1 , [1 for i in range(max_levels)]).clip(0,1)
     # plt.imshow(returned_image)
     # plt.show() # TODO RETURN THIS!
     return (returned_image)
@@ -282,7 +282,7 @@ def blending_example2():
     :return: im1, im2, mask, im_blend
     """
     image1 = read_image(relpath('external/cat1_test.jpg'), 2)
-    image2 = read_image(relpath('external/tiger_test.jpg'), 2)
+    image2 = read_image(relpath('external/tiger_test1.jpg'), 2)
     mask1 = read_image(relpath('external/mask_test.jpg'), 1)
     mask1 = mask1 >0
     # mask1 = np.logical_not(mask1)
