@@ -8,12 +8,13 @@ import matplotlib.pyplot as plt
 from skimage.color import rgb2gray
 from scipy.misc import imread, comb
 from scipy import signal, ndimage
+
 PIXEL_MAX_INTENSITY = 255
 
-def display_image_in_actual_size(im_data):
 
+def display_image_in_actual_size(im_data):
     dpi = 80
-    height, width= im_data.shape
+    height, width = im_data.shape
 
     # What size does the figure need to be in inches to fit the image?
     figsize = width / float(dpi), height / float(dpi)
@@ -28,8 +29,7 @@ def display_image_in_actual_size(im_data):
     # Display the image.
     ax.imshow(im_data, cmap='gray')
 
-    plt.show()
-
+    # plt.show()
 
 
 def create_gaussian_filter(kernel_size):
@@ -60,7 +60,6 @@ def create_gaussian_filter(kernel_size):
     return returned_kernel
 
 
-
 def read_image(filename, representation):
     """
     The function will return an image file represented as the user wished it to be
@@ -79,17 +78,18 @@ def read_image(filename, representation):
         return rgb2gray(newIm)
 
 
-def reduce(im,gaus_filter,gaus_filter_t):
+def reduce(im, gaus_filter, gaus_filter_t):
     im_blured = convolve(im, gaus_filter)
-    im_blured = convolve(im_blured,gaus_filter_t)
-    return im_blured[::2,::2]
+    im_blured = convolve(im_blured, gaus_filter_t)
+    return im_blured[::2, ::2]
 
-def expand(im,filter_vec,filter_vec_t):
-    new_size = np.array(im.shape)*2
-    zero_matrix = np.zeros(new_size,dtype=np.float64)
-    zero_matrix[::2,::2] = im
-    im_blured = convolve(zero_matrix,filter_vec)
-    im_blured = convolve(im_blured,filter_vec_t)
+
+def expand(im, filter_vec, filter_vec_t):
+    new_size = np.array(im.shape) * 2
+    zero_matrix = np.zeros(new_size, dtype=np.float64)
+    zero_matrix[::2, ::2] = im
+    im_blured = convolve(zero_matrix, filter_vec)
+    im_blured = convolve(im_blured, filter_vec_t)
     return im_blured
 
 
@@ -109,26 +109,27 @@ def build_gaussian_pyramid(im, max_levels, filter_size):
     :return:            tuple of two values - pyr, filter_vec
     """
     pyr = []
-    pyr.append(im)
+    new_image = im
+    pyr.append(new_image)
     filter_vec = create_gaussian_filter(filter_size)
-    filter_vec = filter_vec.reshape(filter_size,1)
+    filter_vec = filter_vec.reshape(1, filter_size)
     filter_vec_t = filter_vec.transpose()
 
-    for level in range(max_levels):
-        im_shape = im.shape
+    for level in range(max_levels-1):
+        im_shape = new_image.shape
         if im_shape[0] <= 16 or im_shape[1] <= 16:
             break
         else:
-            reduced_image = reduce(im, filter_vec,filter_vec_t)
+            reduced_image = reduce(new_image, filter_vec, filter_vec_t)
             pyr.append(reduced_image)
-            im = reduced_image
+            new_image = reduced_image
     # TODO check to see what I can do to check dimensions are multiples of 2**(max_levels−1)
 
     return pyr, filter_vec
 
 
 # SEMI DONE
-def  build_laplacian_pyramid(im, max_levels, filter_size):
+def build_laplacian_pyramid(im, max_levels, filter_size):
     """
     Task 3.1 b
     should return pyr as std array (NOT NUMPY!) with max len of max_levels, and each element of the array is a
@@ -142,23 +143,22 @@ def  build_laplacian_pyramid(im, max_levels, filter_size):
                          in constructing the pyramid filter (e.g for filter_size = 3 you should get [0.25, 0.5, 0.25]).
     :return:             tuple of two values - pyr, filter_vec
     """
-    gaus_pyr, filter_vec = build_gaussian_pyramid(im,max_levels,filter_size)
+    gaus_pyr, filter_vec = build_gaussian_pyramid(im, max_levels, filter_size)
     pyr = []
 
-    filter_vec = (filter_vec*2).reshape(filter_size,1)
+    filter_vec *= 2
+
+    # filter_vec = filter_vec.reshape(filter_size, 1)
     filter_vec_t = filter_vec.transpose()
     level = 0
-    for level in range(len(gaus_pyr)-1):
-
-        expand_image = expand(gaus_pyr[level+1],filter_vec,filter_vec_t)
+    for level in range(len(gaus_pyr) - 1):
+        expand_image = expand(gaus_pyr[level + 1], filter_vec, filter_vec_t)
         new_image = gaus_pyr[level] - expand_image
         pyr.append(new_image)
-    pyr.append(gaus_pyr[level])
-
+    pyr.append(gaus_pyr[level + 1])
 
     # TODO check if the returned image is too bright
-    return pyr , filter_vec
-
+    return pyr, filter_vec
 
 
 def laplacian_to_image(lpyr, filter_vec, coeff):
@@ -170,11 +170,16 @@ def laplacian_to_image(lpyr, filter_vec, coeff):
     :param coeff:
     :return: img
     """
-    returned_im = np.zeros(lpyr[0].shape)
-    for index,pic in enumerate(lpyr):
-        temp_pic = pic * coeff[index]
-        returned_im += temp_pic
-    return returned_im
+
+    new_image = lpyr[0]
+    temp_image = expand(lpyr[len(lpyr) - 1] * coeff[len(coeff) - 1], filter_vec, filter_vec.transpose())
+    for index in range(len(lpyr) - 2, -1, -1):
+        new_image = (lpyr[index]) + temp_image
+
+        temp_image = expand(new_image, filter_vec, filter_vec.transpose())
+
+    return new_image
+
 
 def render_pyramid(pyr, levels):
     """
@@ -183,7 +188,26 @@ def render_pyramid(pyr, levels):
     :param levels:
     :return:
     """
-    pass
+    if levels > len(pyr):
+        levels = len(pyr)
+
+    col_list = [pyr[0].shape[1]]
+
+    # TODO check if for level = 3 need to return 4 images. AND CHECK IF levels-1 is good
+    for i in range(levels - 1):
+        col_list.append(pyr[i].shape[1] // 2)
+    col = np.sum(col_list, 0)
+    init_black_image = np.zeros((pyr[0].shape[0], col))
+    init_index = 0
+
+    for i in range(levels):
+        current_pic = (pyr[i] - pyr[i].min()) / (pyr[i].max() - pyr[i].min())
+        row, col = current_pic.shape
+        # TODO - how to stretch image beteen 0 to 1?
+        init_black_image[0:col, init_index:init_index + row] = current_pic
+        # init_black_image[init_index:row, 0:col] = pyr[index]
+        init_index += col_list[i]
+    return init_black_image
 
 
 def display_pyramid(pyr, levels):
@@ -193,7 +217,11 @@ def display_pyramid(pyr, levels):
     :param levels:
     :return: None
     """
-    pass
+    plt.figure() # TODO REMOVE THIS!
+
+    image = render_pyramid(pyr, levels)
+    plt.imshow(image, cmap=plt.get_cmap('gray'))
+    # plt.show() # TODO RETURN THIS!
 
 
 def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mask):
@@ -213,8 +241,16 @@ def pyramid_blending(im1, im2, mask, max_levels, filter_size_im, filter_size_mas
                             defining the filter used in the construction of the Gaussian pyramid of mask.
     :return:  im_blend
     """
-    pass
-
+    im1_lpyr = build_laplacian_pyramid(im1, max_levels, filter_size_im)
+    im2_lpyr = build_laplacian_pyramid(im2, max_levels, filter_size_im)
+    mask_gpyr = build_gaussian_pyramid(mask.astype(np.float64), max_levels, filter_size_mask)
+    l_out = []
+    for index in range(max_levels):
+        first_product = np.dot(mask_gpyr[index], im1_lpyr[index])
+        second_product = np.dot((1 - mask_gpyr[index]), im2_lpyr[index])
+        l_out.append(first_product + second_product)
+    return np.clip(laplacian_to_image(l_out, filter_vec, [1 for i in range(max_levels)]), 0,
+                   1)  # TODO check the function
 
 
 def blending_example1():
@@ -223,6 +259,7 @@ def blending_example1():
     :return: im1, im2, mask, im_blend
     """
     pass
+
 
 def blending_example2():
     """
@@ -233,18 +270,26 @@ def blending_example2():
 
 
 if __name__ == '__main__':
-    image_path = "/cs/usr/erez/Documents/image processing/exs/HUJI.Course_Image_Processing/ex3/gray_orig.png"
-    im = read_image(image_path,1)
-    pyr, filter_vec = build_laplacian_pyramid(im,3,3)
+    image_path = "F:\My Documents\Google Drive\תואר ראשון מדמח\שנה ג\עיבוד תמונה\exs\HUJI.Course_Image_Processing\ex3\gray_orig.png"
+    im = read_image(image_path, 1)
+    pyr, filter_vec = build_laplacian_pyramid(im, 4 , 3)
     image = im
 
-    lap_pyr = list(pyramid_laplacian(image,max_layer=2,downscale=2))
+    lap_pyr = list(pyramid_laplacian(image, max_layer=3, downscale=2))
 
     # for pic in pyr:
     #     display_image_in_actual_size(pic)
 
-    image = laplacian_to_image(lap_pyr,filter_vec,[1,1,1])
-    plt.imshow(image,cmap=plt.get_cmap('gray'))
+    # for pic, bpic in zip(pyr,lap_pyr):
+    #     plt.figure()
+    #     display_image_in_actual_size(pic)
+    #     display_image_in_actual_size(bpic)
+    #     plt.show()
+    display_pyramid(lap_pyr, 4)
+    display_pyramid(pyr, 4)
+    plt.show()
+    # image = laplacian_to_image(pyr,filter_vec,[1,1,1])
+
     # for buikt_pyt, pyt in zip(lap_pyr,pyr):
     #     display_image_in_actual_size(buikt_pyt)
     #     display_image_in_actual_size(pyt)

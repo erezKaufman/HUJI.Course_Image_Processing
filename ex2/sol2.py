@@ -25,7 +25,6 @@ def read_image(filename, representation=1):
         return imread(filename, False).astype(np.float64) / NORMALIZE_IMAGE_VALUES
 
 
-
 def getTransformMatrix(N):
     """
     returns a transformation matrix size of N
@@ -125,11 +124,11 @@ def fourier_der(im):
     F = DFT2(im)
     U = np.concatenate((np.arange(np.floor(N / 2) + 1), np.flip((-1 * np.arange(1, np.ceil(N / 2))), 0)))
 
-    dx = IDFT2(F * U.reshape(N,1))
+    dx = IDFT2(F * U.reshape(N, 1))
 
     M = im.shape[1]
     V = np.concatenate((np.arange(np.floor(M / 2) + 1), np.flip((-1 * np.arange(1, np.ceil(M / 2))), 0)))
-    dy = IDFT2(F * V.reshape(1,M))
+    dy = IDFT2(F * V.reshape(1, M))
 
     return getMagnitude(dx, dy)
 
@@ -156,10 +155,11 @@ def blur_spatial(im, kernel_size):
     :param kernel_size: the kernel size
     :return: a blurred image
     """
-    if(kernel_size==1):
+    if (kernel_size == 1):
         return im
     guass_kernel = getGaussianKernel(kernel_size)
-    return signal.convolve2d(im, guass_kernel,mode='same',boundary='fill',fillvalue=0)
+    return signal.convolve2d(im, guass_kernel, mode='same', boundary='fill', fillvalue=0)
+
 
 def blur_fourier(im, kernel_size):
     """
@@ -168,7 +168,7 @@ def blur_fourier(im, kernel_size):
     :param kernel_size: the kernel size
     :return: a blurred image
     """
-    if(kernel_size==1):
+    if (kernel_size == 1):
         return im
     M, N = im.shape
     kernel = getGaussianKernel(kernel_size)
@@ -180,4 +180,4 @@ def blur_fourier(im, kernel_size):
     G[X - offset:X + offset + 1, Y - offset:Y + offset + 1] = kernel
     G = np.fft.ifftshift(G)
     fourier_im = DFT2(im)
-    return np.real(IDFT2(np.multiply(fourier_im,G)))
+    return np.real(IDFT2(np.multiply(fourier_im, G)))
