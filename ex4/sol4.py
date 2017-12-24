@@ -24,20 +24,6 @@ def relpath(filename):
     return os.path.join(os.path.dirname(__file__), filename)
 
 
-# TODO DELETE ME
-def showIm(ims):
-    """
-
-    :param im:
-    :return:
-    """
-    plt.imshow(ims, cmap=plt.get_cmap('gray'))
-    plt.show()
-
-
-#### DELETE ME
-
-
 def harris_corner_detector(im):
     """
     Detects harris corners.
@@ -46,8 +32,6 @@ def harris_corner_detector(im):
     :return: An array with shape (N,2), where ret[i,:] are the [x,y] coordinates of the ith corner points.
     """
 
-    # X_DERIVED_FILTER = np.array([1, 0, -1]).reshape(3, 1)
-    # Y_DERIVED_FILTER = X_DERIVED_FILTER.T
     # TODO check if need to multiply filter by intensity (0.5)
     i_x = convolve(im, X_DERIVED_FILTER)
 
@@ -75,15 +59,7 @@ def harris_corner_detector(im):
     binary_image = non_maximum_suppression(R)
 
     max_coordinates = np.argwhere(binary_image == True)
-    # print(max_coordinates)
     returned_val = np.fliplr(max_coordinates)
-    # plt.figure()
-    # plt.imshow(binary_image,cmap=plt.get_cmap('gray'))
-    # plt.figure()
-    # plt.imshow(blured_ix_iy,cmap=plt.get_cmap('gray'))
-    # plt.figure()
-    # plt.imshow(blured_iy_2,cmap=plt.get_cmap('gray'))
-    # plt.show()
     return returned_val
 
 
@@ -100,16 +76,13 @@ def sample_descriptor(im, pos, desc_rad):
     coord_results = []
     dummy_matrix = np.zeros((desc_rad * 2 + 1, desc_rad * 2 + 1))
     for y_coord, x_coord in pos:  # TODO maybe think of a way to create initial numpy array (will be faster)
-        # TODO fix this method!
         cur_x_coord_range = np.arange(x_coord - desc_rad, x_coord + desc_rad + 1)
         cur_y_coord_range = np.arange(y_coord - desc_rad, y_coord + desc_rad + 1)
         grid = np.meshgrid(cur_x_coord_range, cur_y_coord_range)
-        # TODO consider if I need to np.floor() grid or not. if I floor that will give me back wrong values for odd
-        # TODO coordinates
         cur_map_coord = map_coordinates(im, grid, order=1, prefilter=False)
         cur_map_mean = np.mean(cur_map_coord)
         if np.count_nonzero((cur_map_coord - cur_map_mean)) == 0:
-            result_descriptor = dummy_matrix.copy()  # TODO maybe this should be matrix of 1? check this later
+            result_descriptor = dummy_matrix.copy()
         else:
             result_descriptor = (cur_map_coord - cur_map_mean) / np.linalg.norm(cur_map_coord - cur_map_mean)
 
@@ -148,6 +121,7 @@ def match_features(desc1, desc2, min_score):
     # flat each descriptor matrix to be shape(Ni,desc_rad**2)
     flattend_desc1 = desc1.reshape(desc1.shape[0], desc1.shape[1] ** 2)
     flattend_desc2 = desc2.reshape(desc2.shape[0], desc2.shape[1] ** 2).T
+
     # create score matrix for each descriptor with other descriptors of the second image
     S_matrix = np.dot(flattend_desc1, flattend_desc2)
 
@@ -155,32 +129,11 @@ def match_features(desc1, desc2, min_score):
     s_sorted_by_row = np.sort(S_matrix.copy(), axis=1)
     s_sorted_by_col = np.sort(S_matrix.copy(), axis=0)
 
-    # take coordinates of all cells that are the larger than the second max cell in the row of the Transformed score
-    # matrix. and the flip it.
-    row_max_coordinates = np.argwhere(np.where((S_matrix.T >= s_sorted_by_row[:, -2]), S_matrix.T, False))
-    row_max_coordinates = np.fliplr(row_max_coordinates)
+    result = np.all(((S_matrix >= s_sorted_by_col[-2]), (S_matrix.T >= s_sorted_by_row[:, -2]).T, (S_matrix >
+                                                                                                   min_score)), axis=0)
+    returned_arrays = np.where(result)
 
-    match_ind = np.array(row_max_coordinates)
-
-    # take coordinates of all cells that are the larger than the second max cell in the col of the score matrix.
-    col_max_coordinates = np.argwhere(np.where((S_matrix >= s_sorted_by_col[-2]), S_matrix, False))
-
-    temp_array = intersect_2d_arrays(col_max_coordinates, match_ind)
-
-    min_score_coordinates = np.argwhere(S_matrix >= min_score)
-
-    result = intersect_2d_arrays(temp_array, min_score_coordinates)
-    res1 = result[:, 0]
-    res2 = result[:, 1]
-
-    return res1, res2
-
-
-def intersect_2d_arrays(col_max_coordinates, match_ind):
-    aset = set([tuple(x) for x in match_ind])
-    bset = set([tuple(x) for x in col_max_coordinates])
-    c = np.array([x for x in aset & bset])
-    return c
+    return returned_arrays
 
 
 def apply_homography(pos1, H12):
@@ -190,7 +143,6 @@ def apply_homography(pos1, H12):
     :param H12: A 3x3 homography matrix.
     :return: An array with the same shape as pos1 with [x,y] point coordinates obtained from transforming pos1 using H12.
     """
-    # pos1 = pos1.reshape(int(pos1.shape[0]*pos1.shape[1]*pos1.shape[2]/2),2)
     pos1 = np.insert(pos1, pos1.shape[1], 1, axis=1)
     temp_homography1 = np.dot(H12, pos1.T).T
     z = temp_homography1[:, 2].reshape(temp_homography1.shape[0], 1)
@@ -208,68 +160,41 @@ def ransac_homography(points1, points2, num_iter, inlier_tol, translation_only=F
         :param translation_only:
         :return:
         """
-        rand_points_picked = []
-        # Pick a random set of 2 point matches from pos1 and pos2.
-        # We call these two sets of 2 points in the two images P1J and P2J
 
+        # Pick a random set of 2 point matches from pos1 and pos2.  We call these two sets of 2 points in the two
+        # images P1J and P2J
         rand_matched_points = np.random.randint(0, points1.shape[0], 2)
-        # make sure we only take different points from other iterations
-        # while rand_matched_points in rand_points_picked:
 
-        # # TODO CHECK IF NEED 4 or 2 :/
-        # rand_points_picked.append(rand_matched_points)
-        # p1j = np.array([points1[rand_matched_points[0]], points1[rand_matched_points[1]],
-        #                 points1[rand_matched_points[2]], points1[rand_matched_points[3]]])
-        # p2j = np.array([points2[rand_matched_points[0]], points2[rand_matched_points[1]],
-        #                 points2[rand_matched_points[2]], points2[rand_matched_points[3]]])
+        if translation_only:
+            p1j_helper = np.array([points1[rand_matched_points[0]]])
+            p2j_helper = np.array([points2[rand_matched_points[0]]])
+        else:
+            p1j_helper = np.array([points1[rand_matched_points[0]], points1[rand_matched_points[1]]])
+            p2j_helper = np.array([points2[rand_matched_points[0]], points2[rand_matched_points[1]]])
 
-        rand_points_picked.append(rand_matched_points)
-        p1j = np.array([points1[rand_matched_points[0]], points1[rand_matched_points[1]]])
-        p2j = np.array([points2[rand_matched_points[0]], points2[rand_matched_points[1]]])
+        return p1j_helper, p2j_helper
 
-        return p1j, p2j
-
-    def ransac_homogrophy_step_3(h12, inlier_counter, inlier_tol, largest_inlier_set, outier_counter, p2j, points1):
+    def ransac_homogrophy_step_3(h12_helper, inlier_tol_helper, largest_inlier_set_helper, p2j_helper, points1_helper):
         """
-
-        :param h12:
+        the function is responsible to the step 3 of the ransac algorightm, on which we calculate all the scores of
+        each pixel to the current homography, and check if it is the best solution for our images
+        :param h12_helper:
         :param inlier_counter:
-        :param inlier_tol:
-        :param largest_inlier_set:
+        :param inlier_tol_helper:
+        :param largest_inlier_set_helper:
         :param outier_counter:
-        :param p2j:
-        :param points1:
+        :param p2j_helper:
+        :param points1_helper:
         :return:
         """
-        # p2j_tag = apply_homography(points1, h12)
-        # current_inlier_set = []
-        #
-        # ej = (np.linalg.norm(p2j_tag - p2j) ** 2)
-        # print(np.count_nonzero(np.where(ej < inlier_tol)))
-        # if ej < inlier_tol:
-        #     inlier_counter += 1
-        #     current_inlier_set.append(i)
-        # else:
-        #     outier_counter += 1
-        # if inlier_counter > len(largest_inlier_set):
-        #     largest_inlier_set = current_inlier_set
-        # return largest_inlier_set
-        p2j_tag = apply_homography(points1, h12)
-        ej_norm = np.sum(np.abs(np.asarray(p2j_tag - p2j)) ** 2, axis=-1) ** (1. / 2)
+
+        p2j_tag = apply_homography(points1_helper, h12_helper)
+        ej_norm = np.sum(np.abs(np.asarray(p2j_tag - p2j_helper)) ** 2, axis=-1) ** (1. / 2)
         ej_final = ej_norm ** 2
-        current_inlier_set = np.argwhere(ej_final < inlier_tol)
-        if current_inlier_set.size > largest_inlier_set.size:
-            largest_inlier_set = current_inlier_set
-        # for i in range(points1.shape[0]):
-        #     ej = (np.linalg.norm(p2j_tag[i] - p2j[i]) ** 2)
-        #     if ej < inlier_tol:
-        #         inlier_counter += 1
-        #         current_inlier_set.append(i)
-        #     else:
-        #         outier_counter += 1
-        #     if inlier_counter > len(largest_inlier_set):
-        #         largest_inlier_set = current_inlier_set
-        return largest_inlier_set
+        current_inlier_set = np.argwhere(ej_final < inlier_tol_helper)
+        if current_inlier_set.size > largest_inlier_set_helper.size:
+            largest_inlier_set_helper = current_inlier_set
+        return largest_inlier_set_helper
 
     """
     Computes homography between two sets of points using RANSAC.
@@ -284,21 +209,17 @@ def ransac_homography(points1, points2, num_iter, inlier_tol, translation_only=F
                     containing the indices in pos1/pos2 of the maximal set of inlier matches found.
     """
 
-    inlier_counter = 0
-    outier_counter = 0
     largest_inlier_set = np.array([])
     for i in range(num_iter):
         # --Step 1 --
         p1j, p2j = ransac_homography_step_1(points1, points2, translation_only)
 
         # --Step 2 --
-        # print(p1j.shape)
-        # print(p2j.shape)
         h12 = np.asarray(estimate_rigid_transform(p1j, p2j, translation_only))
-        # norm_h12 = (h12-h12.min())/(h12.max()-h12.min())
+        h12 = h12 / h12[2, 2]
+
         # --Step 3 --
-        largest_inlier_set = ransac_homogrophy_step_3(h12, inlier_counter, inlier_tol, largest_inlier_set,
-                                                      outier_counter, points2, points1)
+        largest_inlier_set = ransac_homogrophy_step_3(h12, inlier_tol, largest_inlier_set, points2, points1)
 
     # recompute the homography over Jin
     p1j_in = points1[largest_inlier_set].reshape((len(largest_inlier_set), 2))
@@ -308,7 +229,7 @@ def ransac_homography(points1, points2, num_iter, inlier_tol, translation_only=F
     return returned_h, largest_inlier_set
 
 
-def display_matches(im1, im2, points1, points2, inliers):
+def display_matches(im1, im2, points1, points2, inliers):  # TODO COMPLETE THIS
     """
     Dispalay matching points.
     :param im1: A grayscale image.
@@ -320,7 +241,7 @@ def display_matches(im1, im2, points1, points2, inliers):
     col = im1.shape[1]
     points2[:, 0] = points2[:, 0] + col
     horizontal_concat_image = np.hstack((im1, im2))
-    length = points1.shape[0]
+    # length = points1.shape[0]
     im1_inlier = points1[inliers].reshape(len(inliers), 2)
     im2_inlier = points2[inliers].reshape(len(inliers), 2)
     # print(im1_inlier.shape)
@@ -328,8 +249,6 @@ def display_matches(im1, im2, points1, points2, inliers):
     # im1_outlier = np.delete(points1, inliers).reshape(length-len(inliers),2)
     # im2_outlier = np.delete(points2, inliers).reshape(length-len(inliers),2)
 
-    x_inliers = np.zeros((2, len(inliers)))
-    y_inliers = np.zeros((2, len(inliers)))
 
     # x_inliers[0] = im1_inlier[:, 0]
     # y_inliers[0] = im1_inlier[:, 1]
@@ -339,12 +258,12 @@ def display_matches(im1, im2, points1, points2, inliers):
     y1 = im1_inlier[:, 1]
     x2 = im2_inlier[:, 0]
     y2 = im2_inlier[:, 1]
-    xs_list = np.zeros((2,points1.shape[0]))
-    ys_list = np.zeros((2,points1.shape[0]))
-    xs_list[0] = points1[:,0]
-    xs_list[1] = points2[:,0]
-    ys_list[0] = points1[:,1]
-    ys_list[1] = points2[:,1]
+    xs_list = np.zeros((2, points1.shape[0]))
+    ys_list = np.zeros((2, points1.shape[0]))
+    xs_list[0] = points1[:, 0]
+    xs_list[1] = points2[:, 0]
+    ys_list[0] = points1[:, 1]
+    ys_list[1] = points2[:, 1]
     # print(x1.shape)
     # print(points1.shape)
     # print(points2.shape)
@@ -352,9 +271,8 @@ def display_matches(im1, im2, points1, points2, inliers):
     # all_points_xs = [points1[:, 0], points2[:, 0]]
     #
     # all_points_ys = [points1[:, 1], [points2[:, 1]]]
-    plt.plot(xs_list, ys_list, mfc= 'r', c= 'b', lw= .4, ms= 5, marker= '.'
-                                                                 )
-    plt.plot([x1,x2], [y1,y2], mfc='r', c='y', lw=.4, ms=5, marker='.')
+    plt.plot(xs_list, ys_list, mfc='r', c='b', lw=.4, ms=5, marker='.')
+    plt.plot([x1, x2], [y1, y2], mfc='r', c='y', lw=.4, ms=5, marker='.')
     plt.imshow(horizontal_concat_image, cmap="gray")
     plt.show()
     #
@@ -408,7 +326,17 @@ def accumulate_homographies(H_succesive, m):
     :return: A list of M 3x3 homography matrices,
       where H2m[i] transforms points from coordinate system i to coordinate system m
     """
-    pass
+
+    H_succesive = np.asarray(H_succesive)
+    norm_array = H_succesive[:,2,2][:,None]
+    h_length = len(H_succesive)
+    H_succesive = H_succesive / norm_array[:,None]
+    returned_list = np.zeros((h_length+1, 3, 3))  # list of M 3*3 homography matrices
+    returned_list[m] = np.eye(3)
+    returned_list[:m] = np.cumprod(H_succesive[:m],axis=0)
+    # TODO - considet maybe in the following line I need to run the list backwards
+    returned_list[m+1:] = np.cumprod(np.linalg.inv(H_succesive[m:]),axis=0)
+    return returned_list
 
 
 def compute_bounding_box(homography, w, h):
@@ -420,8 +348,16 @@ def compute_bounding_box(homography, w, h):
     :return: 2x2 array, where the first row is [x,y] of the top left corner,
      and the second row is the [x,y] of the bottom right corner
     """
-    pass
 
+    w_min = w.min().floor()
+    h_min = h.min().floor()
+    w_max = w.max().ceil()
+    h_max = h.max().ceil()
+    top_left = apply_homography(np.asarray([w_min,h_min]),homography)
+    bottom_right = apply_homography(np.asarray([w_max, h_max]),homography)
+    top_left = top_left[:].astype(np.int)
+    bottom_right = bottom_right[:].astype(np.int)
+    return np.asarray([top_left, bottom_right])
 
 def warp_channel(image, homography):
     """
@@ -695,14 +631,14 @@ def show_harris():
     image6 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard2.jpg"), 2)
     image7 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard3.jpg"), 1)
     image8 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard3.jpg"), 2)
-    res1 = spread_out_corners(image11, 7, 7, 3)
-    res2 = spread_out_corners(image12, 7, 7, 3)
+    res1 = spread_out_corners(image1, 7, 7, 3)
+    res2 = spread_out_corners(image3, 7, 7, 3)
     # sample_descriptor(image1, res1, 3)
     x = res1[:, 0]
     y = res1[:, 1]
     plt.figure()
     # plt.imshow(image11)
-    plt.imshow(image13, cmap=plt.get_cmap('gray'))
+    plt.imshow(image1, cmap=plt.get_cmap('gray'))
     #
     plt.plot(x, y, '.')
     #
@@ -710,7 +646,7 @@ def show_harris():
     y = res2[:, 1]
     plt.figure()
     # plt.imshow(image12)
-    plt.imshow(image14, cmap=plt.get_cmap('gray'))
+    plt.imshow(image3, cmap=plt.get_cmap('gray'))
     plt.plot(x, y, '.')
     plt.show()
 
@@ -735,6 +671,10 @@ def compute_ransac_and_display():
     points2, desc2 = find_features(gpyr2)
     # print(points1)
     ind1, ind2 = match_features(desc1, desc2, 0.5)
+    plt.figure()
+    plt.imshow(image1)
+
+    plt.show()
     points1, points2 = points1[ind1, :], points2[ind2, :]
     H12, inliers = ransac_homography(points1, points2, 1000, 10)
     # print(len(inliers))
@@ -743,7 +683,12 @@ def compute_ransac_and_display():
 
 
 if __name__ == '__main__':
-    compute_ransac_and_display()
+    I_matrix = np.eye(3)
+    I1 = np.array([1,0,0,0,2,0,0,0,1]).reshape(3,3)
+    I21 = np.array([2,0,0,0,0.5,0,0,0,1]).reshape(3,3)
+    I3 = I_matrix*2
+    accumulate_homographies([I1], 0)
+    # compute_ransac_and_display()
     # show_harris()
 
     # a = np.arange(10 * 4).reshape(10, 2, 2)
