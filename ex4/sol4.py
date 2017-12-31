@@ -263,61 +263,17 @@ def display_matches(im1, im2, points1, points2, inliers):  # TODO COMPLETE THIS
     xs_list[0] = points1[:, 0]
     xs_list[1] = points2[:, 0]
 
-    # new empty list to contain all  y coordinates of matching dots in image1 and image2
     ys_list = np.zeros((2, points1.shape[0]))
     ys_list[0] = points1[:, 1]
     ys_list[1] = points2[:, 1]
 
-    # print(x1.shape)
-    # print(points1.shape)
-    # print(points2.shape)
-    # print(points1[:,1].shape)
-    # all_points_xs = [points1[:, 0], points2[:, 0]]
-    #
-    # all_points_ys = [points1[:, 1], [points2[:, 1]]]
+
     plt.scatter(xs_list, ys_list, c='r', s=5)
     plt.plot(xs_list, ys_list, color='b', linewidth=.4)
     plt.plot([x1, x2], [y1, y2], color='y', linewidth=.4)
     plt.imshow(horizontal_concat_image, cmap=plt.get_cmap('gray'))
-    #
-    # plt.figure()
-    # plt.imshow(horizontal_concat_image, cmap=plt.get_cmap('gray'))
-    # plt.plot(x1, y1, '.', x2, y2, '.')
-    # x = res2[:, 0]
-    # y = res2[:, 1]
-    # plt.figure()
-    # plt.imshow(image4)
-    # plt.plot(x, y, '.')
+
     plt.show()
-    # print(inliers)
-
-
-# def display_matches(im1, im2, points1, points2, inliers):
-#     """
-#     Dispalay matching points.
-#
-#     :param im1: A grayscale image.
-#     :param im2: A grayscale image.
-#     :param points1: An aray shape (N,2), containing N rows of [x,y] coordinates of matched points in im1.
-#     :param points2: An aray shape (N,2), containing N rows of [x,y] coordinates of matched points in im2.
-#     :param inliers: An array with shape (S,) of inlier matches.
-#     """
-#     x_inliers = np.zeros((2, len(inliers)))
-#     y_inliers = np.zeros((2, len(inliers)))
-#     combined_images = np.hstack((im1, im2))
-#
-#     im1_inliers = points1[inliers, :]
-#     im2_inliers = points2[inliers, :]
-#
-#     x_inliers[0] = im1_inliers[:, 0]
-#     x_inliers[1] = im2_inliers[:, 0] + im1.shape[1]
-#     y_inliers[0] = im1_inliers[:, 1]
-#     y_inliers[1] = im2_inliers[:, 1]
-#
-#     plt.plot(x_inliers, y_inliers, mfc='r', c='b', lw=.4, ms=5, marker='o', color='yellow')
-#     plt.imshow(combined_images, cmap="gray")
-#     plt.show()
-
 def accumulate_homographies(H_succesive, m):
     """
     Convert a list of succesive homographies to a
@@ -335,26 +291,6 @@ def accumulate_homographies(H_succesive, m):
     h_length = len(H_succesive)
     H_succesive = H_succesive / norm_array[:, None]
 
-
-    # accu_H = [None] * (len(H_succesive) + 1)
-    # # for i=m
-    # accu_H[m] = np.eye(3)
-    #
-    # # for i<m
-    # for index in range(m - 1, -1, -1):
-    #     accu_H[index] = np.dot(accu_H[index + 1], H_succesive[index])
-    #     accu_H[index] /= accu_H[index][2][2]
-    #
-    # # for i>m
-    # inverse_H_succesive = np.linalg.inv(H_succesive)
-    # for j in range(m + 1, inverse_H_succesive.shape[0] + 1):
-    #     accu_H[j] = np.dot(accu_H[j - 1], inverse_H_succesive[j - 1])
-    #     accu_H[j] /= accu_H[j][2][2]
-    # return accu_H
-
-
-
-
     returned_list = [0] * (h_length + 1)
     new_reversed_list = H_succesive[:m]
     new_reversed_list = new_reversed_list[::-1]
@@ -367,9 +303,12 @@ def accumulate_homographies(H_succesive, m):
     returned_list[m + 1:] = list(accumulate(np.linalg.inv(H_succesive[m:]), func=lambda x, y: x.dot(y)))
     returned_list = np.asarray(returned_list)
     norm_array = returned_list[:, 2, 2][:, None]
-    returned_list= returned_list/ norm_array[:, None] # TODO need to normilize this!!
+    returned_list= returned_list/ norm_array[:, None]
 
-    return returned_list.tolist()
+    regular_boring_list = [0] * (h_length + 1)
+    for i in range(h_length+1):
+        regular_boring_list[i] = returned_list[i]
+    return regular_boring_list
 
 
 def compute_bounding_box(homography, w, h):
@@ -413,6 +352,7 @@ def warp_channel(image, homography):
     grid = np.asarray([grid[0].flatten(), grid[1].flatten()]).T
 
     image_in_reference_coords = np.fliplr(apply_homography(grid, np.linalg.inv(homography))).T
+
     cur_map_coord = map_coordinates(image, image_in_reference_coords, order=1, prefilter=False)
 
     row = bottom_right[1] - top_left[1]
@@ -671,103 +611,8 @@ class PanoramicVideoGenerator:
     plt.imshow(self.panoramas[panorama_index].clip(0, 1))
     plt.show()
 
-def show_harris():
-    image1 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford1.jpg"), 1)
-    image12 = sol4_utils.read_image(relpath("panorama_test1.jpg"), 1)
-    image14 = sol4_utils.read_image(relpath("panorama_test1.jpg"), 2)
-    image11 = sol4_utils.read_image(relpath("panorama_test2.jpg"), 1)
-    image13 = sol4_utils.read_image(relpath("panorama_test2.jpg"), 2)
-    image2 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford1.jpg"), 2)
-    image3 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford2.jpg"), 1)
-    image4 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford2.jpg"), 2)
-    image5 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard2.jpg"), 1)
-    image6 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard2.jpg"), 2)
-    image7 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard3.jpg"), 1)
-    image8 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard3.jpg"), 2)
-    res1 = spread_out_corners(image1, 7, 7, 3)
-    res2 = spread_out_corners(image3, 7, 7, 3)
-    # sample_descriptor(image1, res1, 3)
-    x = res1[:, 0]
-    y = res1[:, 1]
-    plt.figure()
-    # plt.imshow(image11)
-    plt.imshow(image1, cmap=plt.get_cmap('gray'))
-    #
-    plt.plot(x, y, '.')
-    #
-    x = res2[:, 0]
-    y = res2[:, 1]
-    plt.figure()
-    # plt.imshow(image12)
-    plt.imshow(image3, cmap=plt.get_cmap('gray'))
-    plt.plot(x, y, '.')
-    plt.show()
-
-
-def compute_ransac_and_display():
-    image1 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford1.jpg"), 1)
-    # image12 = sol4_utils.read_image(relpath("ex4-impr-master\external\DSC_0784.JPG"), 1)
-    # image14 = sol4_utils.read_image(relpath("ex4-impr-master\external\DSC_0784.JPG"), 2)
-    # image11 = sol4_utils.read_image(relpath("ex4-impr-master\external\DSC_0783.JPG"), 1)
-    # image13 = sol4_utils.read_image(relpath("ex4-impr-master\external\DSC_0783.JPG"), 2)
-    image2 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford1.jpg"), 2)
-    image3 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford2.jpg"), 1)
-    image4 = sol4_utils.read_image(relpath("ex4-impr-master\external\oxford2.jpg"), 2)
-    image5 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard1.jpg"), 1)
-    image6 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard1.jpg"), 2)
-    image7 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard2.jpg"), 1)
-    image8 = sol4_utils.read_image(relpath("ex4-impr-master\external\\backyard2.jpg"), 2)
-
-    gpyr1 = sol4_utils.build_gaussian_pyramid(image1, 3, 3)[0]
-    gpyr2 = sol4_utils.build_gaussian_pyramid(image3, 3, 3)[0]
-    points1, desc1 = find_features(gpyr1)
-    points2, desc2 = find_features(gpyr2)
-    # print(points1)
-    ind1, ind2 = match_features(desc1, desc2, 0.5)
-    points1, points2 = points1[ind1, :], points2[ind2, :]
-
-    H12, inliers = ransac_homography(points1, points2, 1000, 10)
-
-    # warp_image(image6,
-    # display_matches(image5, image7, points1, points2, inliers)
-    # H = accumulate_homographies()
-    H11 = np.eye(3)
-    # H11[1,1] = 2
-    warped_channel = warp_channel(image1, H11)
-    plt.imshow(warped_channel, cmap='gray')
-    plt.show()
-
-
 if __name__ == '__main__':
-    # I_matrix = np.eye(3)
-    # I1 = np.array([1,0,0,0,2,0,0,0,1]).reshape(3,3)
-    # I21 = np.array([2,0,0,0,0.5,0,0,0,1]).reshape(3,3)
-    # I3 = I_matrix*2
-    # accumulate_homographies([I1], 0)
-    # compute_ransac_and_display()
-
     p = PanoramicVideoGenerator(os.getcwd(), 'oxford', 2)
     p.align_images(False)
     p.generate_panoramic_images(1)
     p.show_panorama(0)
-    # show_harris()
-
-    # a = np.arange(10 * 4).reshape(10, 2, 2)
-    # b = np.arange(12 * 4).reshape(12, 2, 2)
-    # ind1, ind2 = match_features(a, b, 0.5)
-    # a, b = a[ind1], b[ind2]
-    # print(a, b)
-
-    # b = np.array([1, 2, 3, 4, 5, 6]).reshape(3, 2)  # 1*2+2*3+3*4= 2+6+12=20
-    # b = np.insert(b, 2, 1, axis=1)
-    # print(b)
-    # print(b.shape)
-    # d = np.array([5, 6]).reshape(2, 1)  # 1*2+2*3+3*4= 2+6+12=20
-    # y = np.array([1, 1]).reshape(2, 1)  # 1*2+2*3+3*4= 2+6+12=20
-    # vecs = np.array([b, d,y])
-    # print(np.insert(vecs,2,1,axis=-1))
-    # c = np.dot(a, b)
-    # print(c)
-    # print(a)
-    # print(np.sort(a,axis=1)) # by row
-    # print(np.sort(a,axis=0)) # by col

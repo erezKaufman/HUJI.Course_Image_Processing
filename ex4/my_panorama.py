@@ -4,12 +4,12 @@ import time
 
 def main():
 
-    my_panorama = 'test1.mp4'
+    my_panorama = 'aquari2.mp4'
 
     exp_no_ext = my_panorama .split('.')[0]
     os.system('mkdir dump')
     os.system('mkdir dump/%s' % exp_no_ext)
-    os.system('ffmpeg -i videos/%s dump/%s/%s%%03d.jpg' % (my_panorama , exp_no_ext, exp_no_ext))
+    os.system('ffmpeg -i videos/%s -frames 500 dump/%s/%s%%03d.jpg' % (my_panorama , exp_no_ext, exp_no_ext))
 
     s = time.time()
     panorama_generator = sol4.PanoramicVideoGenerator('dump/%s/' % exp_no_ext, exp_no_ext, 2100)
@@ -22,4 +22,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-  #test
