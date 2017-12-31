@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2620a1b5-797b-4eff-a80d-dff0764034c4" name="Default" comment="">
+<<<<<<< Updated upstream
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/external/20161022_133731.jpg" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/external/20161022_133815.jpg" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/external/backyard1.jpg" />
@@ -16,6 +17,8 @@
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/presubmit.tar" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/example_panoramas.py" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ex4/ex4-impr-master/sol4.py" />
+=======
+>>>>>>> Stashed changes
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="HUJI.Course_Image_Processing.iws" />
@@ -46,6 +49,7 @@
       <file leaf-file-name="sol4.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/ex4/sol4.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
             <state relative-caret-position="308">
               <caret line="236" column="26" selection-start-line="236" selection-start-column="26" selection-end-line="236" selection-end-column="26" />
               <folding>
@@ -62,13 +66,22 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="181">
               <caret line="2529" column="0" selection-start-line="2529" selection-start-column="0" selection-end-line="2529" selection-end-column="0" />
+=======
+            <state relative-caret-position="132">
+              <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+>>>>>>> Stashed changes
               <folding />
             </state>
           </provider>
         </entry>
       </file>
+<<<<<<< Updated upstream
       <file leaf-file-name="pyplot.py" pinned="false" current-in-tab="false">
         <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/matplotlib/pyplot.py">
+=======
+      <file leaf-file-name="sol3.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../cs.git/ex3-erez/sol3.py">
+>>>>>>> Stashed changes
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="103">
               <caret line="3227" column="4" selection-start-line="3227" selection-start-column="4" selection-end-line="3227" selection-end-column="4" />
@@ -77,6 +90,7 @@
           </provider>
         </entry>
       </file>
+<<<<<<< Updated upstream
       <file leaf-file-name="shape_base.py" pinned="false" current-in-tab="false">
         <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/numpy/core/shape_base.py">
           <provider selected="true" editor-type-id="text-editor">
@@ -103,6 +117,16 @@
             <state relative-caret-position="14344">
               <caret line="659" column="0" selection-start-line="659" selection-start-column="0" selection-end-line="659" selection-end-column="0" />
               <folding />
+=======
+      <file leaf-file-name="sol2.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ex2/sol2.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2420">
+              <caret line="110" column="41" lean-forward="false" selection-start-line="110" selection-start-column="41" selection-end-line="110" selection-end-column="41" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
+>>>>>>> Stashed changes
             </state>
           </provider>
         </entry>
@@ -110,9 +134,17 @@
       <file leaf-file-name="signaltools.py" pinned="false" current-in-tab="false">
         <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/scipy/signal/signaltools.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
             <state relative-caret-position="489">
               <caret line="969" column="14" selection-start-line="969" selection-start-column="10" selection-end-line="969" selection-end-column="14" />
               <folding />
+=======
+            <state relative-caret-position="2442">
+              <caret line="116" column="4" lean-forward="false" selection-start-line="116" selection-start-column="4" selection-end-line="116" selection-end-column="4" />
+              <folding>
+                <element signature="e#1#10#0" expanded="true" />
+              </folding>
+>>>>>>> Stashed changes
             </state>
           </provider>
         </entry>
@@ -130,8 +162,13 @@
       <file leaf-file-name="sol4_utils.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ex4/sol4_utils.py">
           <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
             <state relative-caret-position="324">
               <caret line="144" column="0" selection-start-line="144" selection-start-column="0" selection-end-line="144" selection-end-column="0" />
+=======
+            <state relative-caret-position="2024">
+              <caret line="96" column="2" lean-forward="false" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="2" />
+>>>>>>> Stashed changes
               <folding>
                 <element signature="e#1#10#0" expanded="true" />
               </folding>
@@ -150,8 +187,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>plt.ims</find>
-      <find>plt.im</find>
       <find>im</find>
       <find>imshow</find>
       <find>display_image_in_actual_size</find>
@@ -180,6 +215,8 @@
       <find>der</find>
       <find>conv</find>
       <find>i_x</find>
+      <find>pos</find>
+      <find>corner</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -253,6 +290,7 @@
       <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
+<<<<<<< Updated upstream
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="HUJI.Course_Image_Processing" />
@@ -283,6 +321,20 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+=======
+          <expand>
+            <path>
+              <item name="HUJI.Course_Image_Processing" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HUJI.Course_Image_Processing" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="HUJI.Course_Image_Processing" type="b2602c69:ProjectViewProjectNode" />
+              <item name="HUJI.Course_Image_Processing" type="462c0819:PsiDirectoryNode" />
+              <item name="ex4" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+>>>>>>> Stashed changes
         </subPane>
       </pane>
     </panes>
@@ -683,6 +735,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
+<<<<<<< Updated upstream
     <frame x="-9" y="-9" width="1938" height="1048" extended-state="6" />
     <editor active="false" />
     <layout>
@@ -696,6 +749,22 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32855567" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="WINDOWED" visible="false" show_stripe_button="true" weight="0.40770102" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="150" y="206" width="1914" height="617" />
+=======
+    <frame x="543" y="67" width="1924" height="1038" extended-state="6" />
+    <layout>
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26730564" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.29437706" sideWeight="0.5021299" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32414553" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3295583" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.98557156" sideWeight="0.4978701" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32855567" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.47298786" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32960597" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+>>>>>>> Stashed changes
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -785,6 +854,7 @@
           <line>35</line>
           <option name="timeStamp" value="37" />
         </line-breakpoint>
+<<<<<<< Updated upstream
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ex4/sol4.py</url>
           <line>33</line>
@@ -815,6 +885,8 @@
           <line>344</line>
           <option name="timeStamp" value="207" />
         </line-breakpoint>
+=======
+>>>>>>> Stashed changes
       </breakpoints>
       <breakpoints-dialog>
         <breakpoints-dialog />
@@ -906,8 +978,13 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/scipy/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+=======
+        <state relative-caret-position="3256">
+          <caret line="152" column="0" lean-forward="false" selection-start-line="152" selection-start-column="0" selection-end-line="152" selection-end-column="0" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
@@ -920,8 +997,13 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/matplotlib/axes/_axes.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="-132">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+=======
+        <state relative-caret-position="6336">
+          <caret line="294" column="21" lean-forward="false" selection-start-line="294" selection-start-column="21" selection-end-line="294" selection-end-column="21" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
@@ -934,6 +1016,7 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/numpy/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="164">
           <caret line="36" column="52" selection-start-line="36" selection-start-column="50" selection-end-line="36" selection-end-column="52" />
         </state>
@@ -951,19 +1034,29 @@
         <state relative-caret-position="374">
           <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
           <folding />
+=======
+        <state relative-caret-position="88">
+          <caret line="4" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/pydevd.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="477">
           <caret line="963" column="0" selection-start-line="963" selection-start-column="0" selection-end-line="963" selection-end-column="0" />
           <folding />
+=======
+        <state relative-caret-position="132">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/numpy/lib/arraysetops.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="270">
           <caret line="305" column="21" selection-start-line="305" selection-start-column="21" selection-end-line="305" selection-end-column="21" />
           <folding />
@@ -977,11 +1070,16 @@
           <folding>
             <element signature="e#0#18#0" expanded="false" />
           </folding>
+=======
+        <state relative-caret-position="132">
+          <caret line="10" column="28" lean-forward="false" selection-start-line="10" selection-start-column="28" selection-end-line="10" selection-end-column="28" />
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/scipy/ndimage/_ni_support.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="283">
           <caret line="56" column="43" selection-start-line="56" selection-start-column="43" selection-end-line="56" selection-end-column="43" />
         </state>
@@ -991,6 +1089,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-57">
           <caret line="2156" column="4" selection-start-line="2156" selection-start-column="4" selection-end-line="2156" selection-end-column="4" />
+=======
+        <state relative-caret-position="132">
+          <caret line="6" column="0" lean-forward="false" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+>>>>>>> Stashed changes
           <folding />
         </state>
       </provider>
@@ -1012,9 +1114,17 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/numpy/linalg/linalg.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="188">
           <caret line="1367" column="0" selection-start-line="1367" selection-start-column="0" selection-end-line="1367" selection-end-column="0" />
           <folding />
+=======
+        <state relative-caret-position="2024">
+          <caret line="96" column="2" lean-forward="false" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="2" />
+          <folding>
+            <element signature="e#206#224#0" expanded="true" />
+          </folding>
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
@@ -1058,9 +1168,17 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/numpy/core/shape_base.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="5236">
           <caret line="238" column="4" selection-start-line="238" selection-start-column="4" selection-end-line="238" selection-end-column="4" />
           <folding />
+=======
+        <state relative-caret-position="2442">
+          <caret line="116" column="4" lean-forward="false" selection-start-line="116" selection-start-column="4" selection-end-line="116" selection-end-column="4" />
+          <folding>
+            <element signature="e#1#10#0" expanded="true" />
+          </folding>
+>>>>>>> Stashed changes
         </state>
       </provider>
     </entry>
@@ -1082,6 +1200,7 @@
     </entry>
     <entry file="file://F:/Program Files (x86)/JetBrains/Python/Lib/site-packages/scipy/signal/signaltools.py">
       <provider selected="true" editor-type-id="text-editor">
+<<<<<<< Updated upstream
         <state relative-caret-position="489">
           <caret line="969" column="14" selection-start-line="969" selection-start-column="10" selection-end-line="969" selection-end-column="14" />
           <folding />
@@ -1114,6 +1233,23 @@
             <element signature="e#176#194#0" expanded="true" />
             <element signature="e#9493#9535#0" expanded="false" />
             <marker date="1513706362731" expanded="false" signature="10341:10739" ph="..." />
+=======
+        <state relative-caret-position="2420">
+          <caret line="110" column="41" lean-forward="false" selection-start-line="110" selection-start-column="41" selection-end-line="110" selection-end-column="41" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///tmp/.pycharm-erez/system/python_stubs/-1247971764/numpy/core/multiarray.py" />
+    <entry file="file://$PROJECT_DIR$/ex4/sol4.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="263" column="35" lean-forward="true" selection-start-line="263" selection-start-column="35" selection-end-line="263" selection-end-column="35" />
+          <folding>
+            <element signature="e#177#195#0" expanded="false" />
+>>>>>>> Stashed changes
           </folding>
         </state>
       </provider>
